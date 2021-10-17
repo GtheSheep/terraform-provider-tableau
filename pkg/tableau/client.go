@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -15,13 +16,16 @@ type Client struct {
 }
 
 type Site struct {
-	ContentUrl string `json:"contentUrl`
+	ID         *string `json:"id"`
+	ContentUrl string  `json:"contentUrl`
 }
 
 type Credentials struct {
-	Name     string `json:"name`
-	Password string `json:"password`
-	Site     Site   `json:"site`
+	Name        *string `json:"name`
+	Password    *string `json:"password`
+	TokenName   *string `json:"personalAccessTokenName`
+	TokenSecret *string `json:"personalAccessTokenSecret`
+	Site        Site    `json:"site`
 }
 
 type SignInRequest struct {
@@ -29,18 +33,38 @@ type SignInRequest struct {
 }
 
 type SignInResponse struct {
+	Site                      Site   `json:"site"`
+	User                      User   `json:"user"`
+	Token                     string `json:"token"`
+	EstimatedTimeToExpiration string `json:"estimatedTimeToExpiration"`
 }
 
-func NewClient(server, username, password, site, server_version *string) (*Client, error) {
+func NewClient(server, username, password, personalAccessTokenName, personalAccessTokenSecret, site, serverVersion *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
 	}
 
-	if (server != nil) && (username != nil) && (site != nil) && (server_version != nil) {
-		url := fmt.Sprintf("%s/api/%s/auth/signin", server, server_version)
+	if (server != nil) && (username != nil) && (site != nil) && (serverVersion != nil) {
+		baseUrl := fmt.Sprintf("%s/api/%s", *server, *serverVersion)
+		url := fmt.Sprintf("%s/auth/signin", baseUrl)
 
+		siteStruct := Site{ContentUrl: *site}
+		credentials := Credentials{
+			Name:        username,
+			Password:    password,
+			TokenName:   personalAccessTokenName,
+			TokenSecret: personalAccessTokenSecret,
+			Site:        siteStruct,
+		}
+		authRequest := SignInRequest{
+			Credentials: credentials,
+		}
+		authRequestJson, err := json.Marshal(authRequest)
+		if err != nil {
+			return nil, err
+		}
 		// authenticate
-		req, err := http.NewRequest("POST", url, nil)
+		req, err := http.NewRequest("POST", url, strings.NewReader(string(authRequestJson)))
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +78,8 @@ func NewClient(server, username, password, site, server_version *string) (*Clien
 			return nil, err
 		}
 
-		c.ApiUrl = url
+		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.Site.ID)
+		c.AuthToken = ar.Token
 	}
 
 	return &c, nil
@@ -63,7 +88,7 @@ func NewClient(server, username, password, site, server_version *string) (*Clien
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("x-tableau-auth", c.AuthToken)
+	req.Header.Add("X-Tableau-Auth", c.AuthToken)
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
