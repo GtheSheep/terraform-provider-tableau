@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/gthesheep/terraform-provider-tableau/pkg/resources"
 	"github.com/gthesheep/terraform-provider-tableau/pkg/tableau"
 )
 
@@ -25,16 +26,32 @@ func Provider() *schema.Provider {
 				Description: "Version of the server identified in URL",
 			},
 			"username": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("TABLEAU_USERNAME", nil),
-				Description: "Login Username",
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("TABLEAU_USERNAME", nil),
+				Description:   "Login Username",
+				ConflictsWith: []string{"personal_access_token_name"},
 			},
 			"password": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("TABLEAU_PASSWORD", nil),
-				Description: "Login Password",
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("TABLEAU_PASSWORD", nil),
+				Description:   "Login Password",
+				ConflictsWith: []string{"personal_access_token_secret"},
+			},
+			"personal_access_token_name": &schema.Schema{
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("TABLEAU_PERSONAL_ACCESS_TOKEN_NAME", nil),
+				Description:   "Personal access token name",
+				ConflictsWith: []string{"username"},
+			},
+			"personal_access_token_secret": &schema.Schema{
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET", nil),
+				Description:   "Personal access token secret",
+				ConflictsWith: []string{"password"},
 			},
 			"site": &schema.Schema{
 				Type:        schema.TypeString,
@@ -43,8 +60,10 @@ func Provider() *schema.Provider {
 				Description: "Site name from your Tableau URL",
 			},
 		},
-		DataSourcesMap:       map[string]*schema.Resource{},
-		ResourcesMap:         map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"tableau_user": resources.ResourceUser(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
@@ -52,15 +71,26 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	server := d.Get("server").(string)
+	serverVersion := d.Get("server_version").(string)
+	site := d.Get("site").(string)
+
 	username := d.Get("username").(string)
 	password := d.Get("server").(string)
-	site := d.Get("site").(string)
-	server_version := d.Get("server_version").(string)
+	personalAccessTokenName := d.Get("personal_access_token_name").(string)
+	personalAccessTokenSecret := d.Get("personal_access_token_secret").(string)
 
 	var diags diag.Diagnostics
 
-	if (server != "") && (username != "") && (site != "") && (server_version != "") {
-		c, err := tableau.NewClient(&server, &username, &password, &site, &server_version)
+	if (server != "") && (site != "") && (serverVersion != "") {
+		c, err := tableau.NewClient(
+			&server,
+			&username,
+			&password,
+			&personalAccessTokenName,
+			&personalAccessTokenSecret,
+			&site,
+			&serverVersion,
+		)
 
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
@@ -74,7 +104,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return c, diags
 	}
 
-	c, err := tableau.NewClient(nil, nil, nil, nil, nil)
+	c, err := tableau.NewClient(nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
