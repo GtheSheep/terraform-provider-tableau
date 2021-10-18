@@ -128,7 +128,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	c := m.(*tableau.Client)
 	userId := d.Id()
 
-	if d.HasChange("name") || d.HasChange("siteRole") || d.HasChange("authSetting") {
+	if d.HasChange("name") || d.HasChange("site_role") || d.HasChange("auth_setting") {
 		name := d.Get("name").(string)
 		siteRole := d.Get("site_role").(string)
 		authSetting := d.Get("auth_setting").(string)
