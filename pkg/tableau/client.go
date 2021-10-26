@@ -32,11 +32,15 @@ type SignInRequest struct {
 	Credentials Credentials `json:"credentials`
 }
 
-type SignInResponse struct {
+type SignInResponseData struct {
 	Site                      Site   `json:"site"`
 	User                      User   `json:"user"`
 	Token                     string `json:"token"`
 	EstimatedTimeToExpiration string `json:"estimatedTimeToExpiration"`
+}
+
+type SignInResponse struct {
+	SignInResponseData SignInResponseData `json:"credentials"`
 }
 
 func NewClient(server, username, password, personalAccessTokenName, personalAccessTokenSecret, site, serverVersion *string) (*Client, error) {
@@ -78,8 +82,8 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 			return nil, err
 		}
 
-		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.Site.ID)
-		c.AuthToken = ar.Token
+		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.Site.ID)
+		c.AuthToken = ar.SignInResponseData.Token
 	}
 
 	return &c, nil
