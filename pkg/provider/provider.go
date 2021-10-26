@@ -71,12 +71,12 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
-	server := d.Get("server").(string)
+	server := d.Get("server_url").(string)
 	serverVersion := d.Get("server_version").(string)
 	site := d.Get("site").(string)
 
 	username := d.Get("username").(string)
-	password := d.Get("server").(string)
+	password := d.Get("password").(string)
 	personalAccessTokenName := d.Get("personal_access_token_name").(string)
 	personalAccessTokenSecret := d.Get("personal_access_token_secret").(string)
 
