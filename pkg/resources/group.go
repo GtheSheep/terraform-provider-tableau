@@ -27,17 +27,15 @@ var groupSchema = map[string]*schema.Schema{
 		Description: "Group name",
 	},
 	"minimum_site_role": &schema.Schema{
-		Type:         schema.TypeString,
-		Required:     true,
-		Description:  "Minimum site role for the group",
-		ExactlyOneOf: minimumSiteRoles,
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Minimum site role for the group",
 	},
 	"grant_license_mode": &schema.Schema{
-		Type:         schema.TypeString,
-		Optional:     true,
-		Default:      "onLogin",
-		Description:  "When to grant license for the group to users",
-		ExactlyOneOf: minimumSiteRoles,
+		Type:    schema.TypeString,
+		Optional:    true,
+		Default:     "onLogin",
+		Description: "When to grant license for the group to users",
 	},
 }
 

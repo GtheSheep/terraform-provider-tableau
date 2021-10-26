@@ -44,16 +44,14 @@ var userSchema = map[string]*schema.Schema{
 		Description: "Full name for user",
 	},
 	"site_role": &schema.Schema{
-		Type:         schema.TypeString,
-		Required:     true,
-		Description:  "Site ",
-		ExactlyOneOf: userSiteRoles,
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Site ",
 	},
 	"auth_setting": &schema.Schema{
-		Type:         schema.TypeString,
-		Required:     true,
-		Description:  "Project ID to create the job in",
-		ExactlyOneOf: userAuthSettings,
+		Type:        schema.TypeString,
+		Required:    true,
+		Description: "Project ID to create the job in",
 	},
 }
 

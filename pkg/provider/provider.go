@@ -62,7 +62,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{},
 		ResourcesMap: map[string]*schema.Resource{
-			"tableau_user": resources.ResourceUser(),
+			"tableau_user":  resources.ResourceUser(),
 			"tableau_group": resources.ResourceGroup(),
 		},
 		ConfigureContextFunc: providerConfigure,
