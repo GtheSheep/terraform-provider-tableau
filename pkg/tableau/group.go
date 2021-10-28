@@ -23,7 +23,7 @@ type Group struct {
 	Import GroupImport `json:"import"`
 }
 
-type paginationDetails struct {
+type PaginationDetails struct {
 	PageNumber     int `json:"pageNumber"`
 	PageSize       int `json:"pageSize"`
 	TotalAvailable int `json:"totalAvailable"`
@@ -39,7 +39,7 @@ type GroupsResponse struct {
 
 type GroupListResponse struct {
 	GroupsResponse GroupsResponse    `json:"groups"`
-	Pagination     paginationDetails `json:"pagination"`
+	Pagination     PaginationDetails `json:"pagination"`
 }
 
 func (c *Client) GetGroup(groupID string) (*Group, error) {
@@ -137,16 +137,10 @@ func (c *Client) DeleteGroup(groupID string) (*Group, error) {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	_, err = c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	groupResponse := GroupResponse{}
-	err = json.Unmarshal(body, &groupResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	return &groupResponse.Group, nil
+	return nil, nil
 }

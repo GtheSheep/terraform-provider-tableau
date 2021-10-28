@@ -22,7 +22,7 @@ type UserResponse struct {
 }
 
 func (c *Client) GetUser(userID string) (*User, error) {
-    log.Printf(fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID))
+	log.Printf(fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID))
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID), nil)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 		return nil, err
 	}
 
-    log.Printf(string(newUserJson))
+	log.Printf(string(newUserJson))
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/users", c.ApiUrl), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, 
 		return nil, err
 	}
 
-    log.Printf(string(newUserJson))
+	log.Printf(string(newUserJson))
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/users/%s", c.ApiUrl, userID), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err
@@ -117,16 +117,10 @@ func (c *Client) DeleteUser(userID string) (*User, error) {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
+	_, err = c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	userResponse := UserResponse{}
-	err = json.Unmarshal(body, &userResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	return &userResponse.User, nil
+	return nil, nil
 }
