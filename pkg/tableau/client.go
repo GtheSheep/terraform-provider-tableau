@@ -18,19 +18,19 @@ type Client struct {
 
 type Site struct {
 	ID         *string `json:"id"`
-	ContentUrl string  `json:"contentUrl`
+	ContentUrl string  `json:"contentUrl"`
 }
 
 type Credentials struct {
-	Name        *string `json:"name`
-	Password    *string `json:"password`
-	TokenName   *string `json:"personalAccessTokenName`
-	TokenSecret *string `json:"personalAccessTokenSecret`
-	Site        Site    `json:"site`
+	Name        *string `json:"name"`
+	Password    *string `json:"password"`
+	TokenName   *string `json:"personalAccessTokenName"`
+	TokenSecret *string `json:"personalAccessTokenSecret"`
+	Site        Site    `json:"site"`
 }
 
 type SignInRequest struct {
-	Credentials Credentials `json:"credentials`
+	Credentials Credentials `json:"credentials"`
 }
 
 type SignInResponseData struct {
