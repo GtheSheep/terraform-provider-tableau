@@ -3,6 +3,7 @@ package tableau
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -21,6 +22,7 @@ type UserResponse struct {
 }
 
 func (c *Client) GetUser(userID string) (*User, error) {
+    log.Printf(fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID))
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID), nil)
 	if err != nil {
 		return nil, err
@@ -55,6 +57,7 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 		return nil, err
 	}
 
+    log.Printf(string(newUserJson))
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/users", c.ApiUrl), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err
@@ -87,6 +90,7 @@ func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, 
 		return nil, err
 	}
 
+    log.Printf(string(newUserJson))
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/users/%s", c.ApiUrl, userID), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err
