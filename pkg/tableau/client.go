@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -68,6 +69,8 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 			return nil, err
 		}
 		// authenticate
+		log.Printf(string(authRequestJson))
+		log.Printf(url)
 		req, err := http.NewRequest("POST", url, strings.NewReader(string(authRequestJson)))
 		if err != nil {
 			return nil, err
@@ -83,6 +86,7 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		}
 
 		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.Site.ID)
+		log.Printf(c.ApiUrl)
 		c.AuthToken = ar.SignInResponseData.Token
 	}
 
