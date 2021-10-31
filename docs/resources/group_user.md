@@ -17,8 +17,8 @@ description: |-
 
 ### Required
 
-- **group_id** (Number) Group ID
-- **user_id** (Number) User ID
+- **group_id** (String) Group identifier
+- **user_id** (String) User identifier
 
 ### Optional
 

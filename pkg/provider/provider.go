@@ -63,6 +63,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"tableau_group": data_sources.DatasourceGroup(),
+			"tableau_user":  data_sources.DatasourceUser(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"tableau_user":       resources.ResourceUser(),

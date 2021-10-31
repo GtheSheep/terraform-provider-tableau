@@ -13,14 +13,14 @@ import (
 
 var groupUserSchema = map[string]*schema.Schema{
 	"group_id": &schema.Schema{
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Required:    true,
-		Description: "Group ID",
+		Description: "Group identifier",
 	},
 	"user_id": &schema.Schema{
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Required:    true,
-		Description: "User ID",
+		Description: "User identifier",
 	},
 }
 

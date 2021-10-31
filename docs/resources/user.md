@@ -17,11 +17,11 @@ description: |-
 
 ### Required
 
-- **auth_setting** (String) Project ID to create the job in
+- **auth_setting** (String) Auth setting for the user
 - **email** (String) User email
 - **full_name** (String) Full name for user
 - **name** (String) Display name for user
-- **site_role** (String) Site
+- **site_role** (String) Site role for the user
 
 ### Optional
 

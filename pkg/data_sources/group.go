@@ -2,7 +2,6 @@ package data_sources
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/gthesheep/terraform-provider-tableau/pkg/tableau"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,7 +33,7 @@ func datasourceGroupRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	var diags diag.Diagnostics
 
-	groupID := strconv.Itoa(d.Get("group_id").(int))
+	groupID := d.Get("group_id").(string)
 
 	group, err := c.GetGroup(groupID)
 	if err != nil {

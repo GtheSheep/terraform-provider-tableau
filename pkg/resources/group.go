@@ -6,6 +6,7 @@ import (
 	"github.com/gthesheep/terraform-provider-tableau/pkg/tableau"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var (
@@ -27,9 +28,10 @@ var groupSchema = map[string]*schema.Schema{
 		Description: "Group name",
 	},
 	"minimum_site_role": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Minimum site role for the group",
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Minimum site role for the group",
+		ValidateFunc: validation.StringInSlice(minimumSiteRoles, false),
 	},
 	"grant_license_mode": &schema.Schema{
 		Type:        schema.TypeString,

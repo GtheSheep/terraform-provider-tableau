@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -33,9 +34,31 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 		return nil, err
 	}
 
+	// TODO: Generalise pagination handling and use elsewhere
+	pageNumber, totalPageCount, err := GetPaginationNumbers(groupUsersListResponse.Pagination)
+	if err != nil {
+		return nil, err
+	}
 	for i, user := range groupUsersListResponse.GroupUsersResponse.Users {
 		if *user.ID == userID {
 			return &groupUsersListResponse.GroupUsersResponse.Users[i], nil
+		}
+	}
+
+	for page := pageNumber + 1; page <= totalPageCount; page++ {
+		fmt.Printf("Searching page %d", page)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups/%s/users?pageNumber=%s", c.ApiUrl, groupID, strconv.Itoa(page)), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err = c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+		groupUsersListResponse = GroupUsersListResponse{}
+		err = json.Unmarshal(body, &groupUsersListResponse)
+		if err != nil {
+			return nil, err
 		}
 	}
 

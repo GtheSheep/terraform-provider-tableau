@@ -6,6 +6,7 @@ import (
 	"github.com/gthesheep/terraform-provider-tableau/pkg/tableau"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var (
@@ -44,14 +45,16 @@ var userSchema = map[string]*schema.Schema{
 		Description: "Full name for user",
 	},
 	"site_role": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Site ",
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Site role for the user",
+		ValidateFunc: validation.StringInSlice(userSiteRoles, false),
 	},
 	"auth_setting": &schema.Schema{
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Project ID to create the job in",
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Auth setting for the user",
+		ValidateFunc: validation.StringInSlice(userAuthSettings, false),
 	},
 }
 

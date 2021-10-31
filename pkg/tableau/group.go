@@ -3,7 +3,6 @@ package tableau
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -61,19 +60,11 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 		return nil, err
 	}
 
-	pageNumber, err := strconv.Atoi(groupListResponse.Pagination.PageNumber)
+	// TODO: Generalise pagination handling and use elsewhere
+	pageNumber, totalPageCount, err := GetPaginationNumbers(groupListResponse.Pagination)
 	if err != nil {
 		return nil, err
 	}
-	pageSize, err := strconv.Atoi(groupListResponse.Pagination.PageSize)
-	if err != nil {
-		return nil, err
-	}
-	totalAvailable, err := strconv.Atoi(groupListResponse.Pagination.TotalAvailable)
-	if err != nil {
-		return nil, err
-	}
-	totalPageCount := int(math.Ceil(float64(totalAvailable) / float64(pageSize)))
 	for i, group := range groupListResponse.GroupsResponse.Groups {
 		if *group.ID == groupID {
 			return &groupListResponse.GroupsResponse.Groups[i], nil
