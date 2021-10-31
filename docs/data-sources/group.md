@@ -17,7 +17,7 @@ description: |-
 
 ### Required
 
-- **group_id** (Number) ID of the group
+- **group_id** (String) ID of the group
 
 ### Optional
 

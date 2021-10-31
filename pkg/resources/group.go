@@ -36,7 +36,6 @@ var groupSchema = map[string]*schema.Schema{
 	"grant_license_mode": &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "onLogin",
 		Description: "When to grant license for the group to users",
 	},
 }

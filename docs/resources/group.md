@@ -17,12 +17,12 @@ description: |-
 
 ### Required
 
-- **minimum_site_role** (String) Minimum site role for the group
 - **name** (String) Group name
 
 ### Optional
 
 - **grant_license_mode** (String) When to grant license for the group to users
 - **id** (String) The ID of this resource.
+- **minimum_site_role** (String) Minimum site role for the group
 
 

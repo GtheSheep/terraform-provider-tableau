@@ -17,7 +17,7 @@ description: |-
 
 ### Required
 
-- **user_id** (Number) ID of the user
+- **user_id** (String) ID of the user
 
 ### Optional
 
