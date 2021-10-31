@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/gthesheep/terraform-provider-tableau/pkg/data_sources"
 	"github.com/gthesheep/terraform-provider-tableau/pkg/resources"
 	"github.com/gthesheep/terraform-provider-tableau/pkg/tableau"
 )
@@ -60,10 +61,13 @@ func Provider() *schema.Provider {
 				Description: "Site name from your Tableau URL",
 			},
 		},
-		DataSourcesMap: map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{
+			"tableau_group": data_sources.DatasourceGroup(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
-			"tableau_user":  resources.ResourceUser(),
-			"tableau_group": resources.ResourceGroup(),
+			"tableau_user":       resources.ResourceUser(),
+			"tableau_group":      resources.ResourceGroup(),
+			"tableau_group_user": resources.ResourceGroupUser(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

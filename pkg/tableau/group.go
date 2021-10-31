@@ -3,7 +3,9 @@ package tableau
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -24,9 +26,9 @@ type Group struct {
 }
 
 type PaginationDetails struct {
-	PageNumber     int `json:"pageNumber"`
-	PageSize       int `json:"pageSize"`
-	TotalAvailable int `json:"totalAvailable"`
+	PageNumber     string `json:"pageNumber"`
+	PageSize       string `json:"pageSize"`
+	TotalAvailable string `json:"totalAvailable"`
 }
 
 type GroupResponse struct {
@@ -59,9 +61,39 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 		return nil, err
 	}
 
+	pageNumber, err := strconv.Atoi(groupListResponse.Pagination.PageNumber)
+	if err != nil {
+		return nil, err
+	}
+	pageSize, err := strconv.Atoi(groupListResponse.Pagination.PageSize)
+	if err != nil {
+		return nil, err
+	}
+	totalAvailable, err := strconv.Atoi(groupListResponse.Pagination.TotalAvailable)
+	if err != nil {
+		return nil, err
+	}
+	totalPageCount := int(math.Ceil(float64(totalAvailable) / float64(pageSize)))
 	for i, group := range groupListResponse.GroupsResponse.Groups {
 		if *group.ID == groupID {
 			return &groupListResponse.GroupsResponse.Groups[i], nil
+		}
+	}
+
+	for page := pageNumber + 1; page <= totalPageCount; page++ {
+		fmt.Printf("Searching page %d", page)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err = c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+		groupListResponse = GroupListResponse{}
+		err = json.Unmarshal(body, &groupListResponse)
+		if err != nil {
+			return nil, err
 		}
 	}
 
