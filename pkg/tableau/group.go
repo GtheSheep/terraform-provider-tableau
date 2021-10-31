@@ -9,7 +9,7 @@ import (
 )
 
 type GroupImport struct {
-	MinimumSiteRole  *string `json:"minimumSiteRole"`
+	MinimumSiteRole  *string `json:"siteRole"`
 	GrantLicenseMode *string `json:"grantLicenseMode"`
 }
 

@@ -10,7 +10,7 @@ import (
 
 var groupSchema = map[string]*schema.Schema{
 	"group_id": &schema.Schema{
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Required:    true,
 		Description: "ID of the group",
 	},

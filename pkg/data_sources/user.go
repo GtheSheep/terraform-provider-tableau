@@ -10,7 +10,7 @@ import (
 
 var userSchema = map[string]*schema.Schema{
 	"user_id": &schema.Schema{
-		Type:        schema.TypeInt,
+		Type:        schema.TypeString,
 		Required:    true,
 		Description: "ID of the user",
 	},

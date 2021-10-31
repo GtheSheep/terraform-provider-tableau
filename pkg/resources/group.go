@@ -29,7 +29,7 @@ var groupSchema = map[string]*schema.Schema{
 	},
 	"minimum_site_role": &schema.Schema{
 		Type:         schema.TypeString,
-		Required:     true,
+		Optional:     true,
 		Description:  "Minimum site role for the group",
 		ValidateFunc: validation.StringInSlice(minimumSiteRoles, false),
 	},
