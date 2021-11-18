@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-    dbt = {
+    tableau = {
       source  = "GtheSheep/tableau"
       version = "0.0.12"
     }
