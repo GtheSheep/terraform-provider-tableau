@@ -1,4 +1,4 @@
-resource "tableau_user" "test_user" {
+resource "tableau_user" "example" {
   auth_setting = "SAML"
   email        = "test.user@email.com"
   full_name    = "Test User"
