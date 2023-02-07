@@ -1,7 +1,4 @@
-resource "tableau_user" "example" {
-  auth_setting = "SAML"
-  email        = "test.user@email.com"
-  full_name    = "Test User"
-  name         = "test.user"
-  site_role    = "SiteAdministratorCreator"
+resource "tableau_group_user" "example" {
+  group_id = tableau_group.test_users.id
+  user_id  = tableau_user.test_user.id
 }

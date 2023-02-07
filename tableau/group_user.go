@@ -40,7 +40,7 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 		return nil, err
 	}
 	for i, user := range groupUsersListResponse.GroupUsersResponse.Users {
-		if *user.ID == userID {
+		if user.ID == userID {
 			return &groupUsersListResponse.GroupUsersResponse.Users[i], nil
 		}
 	}
@@ -68,7 +68,7 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 func (c *Client) CreateGroupUser(groupID, userID string) (*User, error) {
 
 	newGroupUser := User{
-		ID: &userID,
+		ID: userID,
 	}
 
 	newGroupUserJson, err := json.Marshal(newGroupUser)
@@ -95,17 +95,17 @@ func (c *Client) CreateGroupUser(groupID, userID string) (*User, error) {
 	return &groupUserResponse.User, nil
 }
 
-func (c *Client) DeleteGroupUser(groupID, userID string) (*User, error) {
+func (c *Client) DeleteGroupUser(groupID, userID string) error {
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/groups/%s/users", c.ApiUrl, groupID), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err = c.doRequest(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }

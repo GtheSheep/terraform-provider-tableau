@@ -14,14 +14,15 @@ type GroupImport struct {
 }
 
 type NewGroup struct {
-	Name            string  `json:"name"`
-	MinimumSiteRole *string `json:"minimumSiteRole"`
+	Name            string `json:"name"`
+	MinimumSiteRole string `json:"minimumSiteRole"`
 }
 
 type Group struct {
-	ID     *string     `json:"id"`
-	Name   string      `json:"name"`
-	Import GroupImport `json:"import"`
+	ID              string      `json:"id"`
+	Name            string      `json:"name"`
+	MinimumSiteRole string      `json:"minimumSiteRole"`
+	Import          GroupImport `json:"import"`
 }
 
 type PaginationDetails struct {
@@ -66,7 +67,7 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 		return nil, err
 	}
 	for i, group := range groupListResponse.GroupsResponse.Groups {
-		if *group.ID == groupID {
+		if group.ID == groupID {
 			return &groupListResponse.GroupsResponse.Groups[i], nil
 		}
 	}
@@ -95,7 +96,7 @@ func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
 
 	newGroup := NewGroup{
 		Name:            name,
-		MinimumSiteRole: &minimumSiteRole,
+		MinimumSiteRole: minimumSiteRole,
 	}
 
 	newGroupJson, err := json.Marshal(newGroup)
@@ -126,7 +127,7 @@ func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string) (*Group, err
 
 	newGroup := NewGroup{
 		Name:            name,
-		MinimumSiteRole: &minimumSiteRole,
+		MinimumSiteRole: minimumSiteRole,
 	}
 
 	newGroupJson, err := json.Marshal(newGroup)
@@ -153,17 +154,17 @@ func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string) (*Group, err
 	return &groupResponse.Group, nil
 }
 
-func (c *Client) DeleteGroup(groupID string) (*Group, error) {
+func (c *Client) DeleteGroup(groupID string) error {
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/groups/%s", c.ApiUrl, groupID), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err = c.doRequest(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }

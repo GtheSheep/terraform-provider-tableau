@@ -9,12 +9,12 @@ import (
 )
 
 type User struct {
-	ID          *string `json:"id"`
-	Email       *string `json:"email"`
-	Name        *string `json:"name"`
-	FullName    *string `json:"fullName"`
-	SiteRole    *string `json:"siteRole"`
-	AuthSetting *string `json:"authSetting"`
+	ID          string `json:"id"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	FullName    string `json:"fullName"`
+	SiteRole    string `json:"siteRole"`
+	AuthSetting string `json:"authSetting"`
 }
 
 type UserResponse struct {
@@ -45,11 +45,11 @@ func (c *Client) GetUser(userID string) (*User, error) {
 func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string) (*User, error) {
 
 	newUser := User{
-		Email:       &email,
-		Name:        &name,
-		FullName:    &fullName,
-		SiteRole:    &siteRole,
-		AuthSetting: &authSetting,
+		Email:       email,
+		Name:        name,
+		FullName:    fullName,
+		SiteRole:    siteRole,
+		AuthSetting: authSetting,
 	}
 
 	newUserJson, err := json.Marshal(newUser)
@@ -57,7 +57,6 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 		return nil, err
 	}
 
-	log.Printf(string(newUserJson))
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/users", c.ApiUrl), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err
@@ -80,9 +79,9 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, error) {
 
 	newUser := User{
-		Name:        &name,
-		SiteRole:    &siteRole,
-		AuthSetting: &authSetting,
+		Name:        name,
+		SiteRole:    siteRole,
+		AuthSetting: authSetting,
 	}
 
 	newUserJson, err := json.Marshal(newUser)
@@ -110,17 +109,17 @@ func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, 
 	return &userResponse.User, nil
 }
 
-func (c *Client) DeleteUser(userID string) (*User, error) {
+func (c *Client) DeleteUser(userID string) error {
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/users/%s", c.ApiUrl, userID), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	_, err = c.doRequest(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }
