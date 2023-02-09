@@ -1,1 +1,1 @@
-terraform import tableau_user.example "abc"
+terraform import tableau_user.example "user_id"

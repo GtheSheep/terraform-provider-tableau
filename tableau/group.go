@@ -21,12 +21,6 @@ type Group struct {
 	Import          *GroupImport `json:"import,omitempty"`
 }
 
-type PaginationDetails struct {
-	PageNumber     string `json:"pageNumber"`
-	PageSize       string `json:"pageSize"`
-	TotalAvailable string `json:"totalAvailable"`
-}
-
 type GroupRequest struct {
 	Group Group `json:"group"`
 }

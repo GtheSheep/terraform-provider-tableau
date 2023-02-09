@@ -258,6 +258,7 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 	return []func() datasource.DataSource{
 		GroupDataSource,
 		UserDataSource,
+		ProjectDataSource,
 	}
 }
 
@@ -266,5 +267,6 @@ func (p *tableauProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewUserResource,
 		NewGroupResource,
 		NewGroupUserResource,
+		NewProjectResource,
 	}
 }
