@@ -3,6 +3,7 @@ package tableau
 import (
 	"math"
 	"strconv"
+	"strings"
 )
 
 func GetPaginationNumbers(paginationDetails PaginationDetails) (int, int, error) {
@@ -21,4 +22,14 @@ func GetPaginationNumbers(paginationDetails PaginationDetails) (int, int, error)
 	totalPageCount := int(math.Ceil(float64(totalAvailable) / float64(pageSize)))
 
 	return pageNumber, totalPageCount, nil
+}
+
+func GetCombinedID(id1, id2 string) string {
+	combined := strings.Join([]string{id1, id2}, ":")
+	return combined
+}
+
+func GetIDsFromCombinedID(id string) (string, string) {
+	split := strings.Split(id, ":")
+	return split[0], split[1]
 }

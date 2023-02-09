@@ -22,8 +22,9 @@ type groupDataSource struct {
 }
 
 type groupDataSourceModel struct {
-	GroupID types.String `tfsdk:"group_id"`
-	Name    types.String `tfsdk:"name"`
+	ID              types.String `tfsdk:"id"`
+	Name            types.String `tfsdk:"name"`
+	MinimumSiteRole types.String `tfsdk:"minimum_site_role"`
 }
 
 func (d *groupDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -34,13 +35,17 @@ func (d *groupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 	resp.Schema = schema.Schema{
 		Description: "Retrieve group details",
 		Attributes: map[string]schema.Attribute{
-			"group_id": schema.StringAttribute{
+			"id": schema.StringAttribute{
 				Required:    true,
 				Description: "ID of the group",
 			},
 			"name": schema.StringAttribute{
 				Computed:    true,
 				Description: "Name for the group",
+			},
+			"minimum_site_role": schema.StringAttribute{
+				Computed:    true,
+				Description: "Minimum site role for the group",
 			},
 		},
 	}
@@ -51,7 +56,7 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 
-	group, err := d.client.GetGroup(state.GroupID.ValueString())
+	group, err := d.client.GetGroup(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Tableau Group",
@@ -60,8 +65,9 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	state.GroupID = types.StringValue(group.ID)
+	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
+	state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

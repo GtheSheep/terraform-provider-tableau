@@ -68,9 +68,8 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		if err != nil {
 			return nil, err
 		}
+
 		// authenticate
-		log.Printf(string(authRequestJson))
-		log.Printf(url)
 		req, err := http.NewRequest("POST", url, strings.NewReader(string(authRequestJson)))
 		if err != nil {
 			return nil, err
@@ -109,7 +108,7 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	if (res.StatusCode != http.StatusOK) && (res.StatusCode != 201) {
+	if (res.StatusCode != http.StatusOK) && (res.StatusCode != 201) && (res.StatusCode != 204) {
 		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 

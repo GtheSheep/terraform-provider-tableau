@@ -32,34 +32,34 @@ func (p *tableauProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 		Description: "Interact with Tableau",
 		Attributes: map[string]schema.Attribute{
 			"server_url": schema.StringAttribute{
-				Optional:    false,
-				Description: "URL of your Tableau server",
+				Optional:    true,
+				Description: "URL of your Tableau server - TABLEAU_SERVER_URL env var",
 			},
 			"server_version": schema.StringAttribute{
-				Optional:    false,
-				Description: "Version of the server identified in URL",
+				Optional:    true,
+				Description: "Version of the server identified in URL - TABLEAU_SERVER_VERSION env var",
 			},
 			"username": schema.StringAttribute{
 				Optional:    true,
-				Description: "Login Username",
+				Description: "Login Username - TABLEAU_USERNAME env var",
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Login Password",
+				Description: "Login Password - TABLEAU_PASSWORD env var",
 			},
 			"personal_access_token_name": schema.StringAttribute{
 				Optional:    true,
-				Description: "Personal access token name",
+				Description: "Personal access token name - TABLEAU_PERSONAL_ACCESS_TOKEN_NAME env var",
 			},
 			"personal_access_token_secret": schema.StringAttribute{
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Personal access token secret",
+				Description: "Personal access token secret - TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET env var",
 			},
 			"site": schema.StringAttribute{
-				Optional:    false,
-				Description: "Site name from your Tableau URL",
+				Optional:    true,
+				Description: "Site name from your Tableau URL - TABLEAU_SITE_NAME env var",
 			},
 		},
 	}

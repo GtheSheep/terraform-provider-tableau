@@ -15,7 +15,7 @@ install: build
 	mkdir -p $(HOME)/.terraform.d/plugins
 	mv ./$(BINARY) $(HOME)/.terraform.d/plugins/$(BINARY)
 
-docs:
+doc:
 	go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
@@ -23,13 +23,16 @@ test: deps
 	go test -mod=readonly ./...
 
 test-acceptance: deps
-	TF_ACC=1 go test -mod=readonly -count=1 ./...
+	TF_ACC=1 go test -mod=readonly -count=1 -v ./tableau
 
 check-docs: docs
 	git diff --exit-code -- docs
 
 deps:
 	go mod tidy
+
+fmt:
+	go fmt ./...
 
 release:
 	git tag "v$(VERSION)"

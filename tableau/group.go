@@ -9,26 +9,26 @@ import (
 )
 
 type GroupImport struct {
+	DomainName       *string `json:"domainName"`
 	MinimumSiteRole  *string `json:"siteRole"`
 	GrantLicenseMode *string `json:"grantLicenseMode"`
 }
 
-type NewGroup struct {
-	Name            string `json:"name"`
-	MinimumSiteRole string `json:"minimumSiteRole"`
-}
-
 type Group struct {
-	ID              string      `json:"id"`
-	Name            string      `json:"name"`
-	MinimumSiteRole string      `json:"minimumSiteRole"`
-	Import          GroupImport `json:"import"`
+	ID              string       `json:"id,omitempty"`
+	Name            string       `json:"name"`
+	MinimumSiteRole string       `json:"minimumSiteRole"`
+	Import          *GroupImport `json:"import,omitempty"`
 }
 
 type PaginationDetails struct {
 	PageNumber     string `json:"pageNumber"`
 	PageSize       string `json:"pageSize"`
 	TotalAvailable string `json:"totalAvailable"`
+}
+
+type GroupRequest struct {
+	Group Group `json:"group"`
 }
 
 type GroupResponse struct {
@@ -94,12 +94,15 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 
 func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
 
-	newGroup := NewGroup{
+	newGroup := Group{
 		Name:            name,
 		MinimumSiteRole: minimumSiteRole,
 	}
+	groupRequest := GroupRequest{
+		Group: newGroup,
+	}
 
-	newGroupJson, err := json.Marshal(newGroup)
+	newGroupJson, err := json.Marshal(groupRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -125,17 +128,20 @@ func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
 
 func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string) (*Group, error) {
 
-	newGroup := NewGroup{
+	group := Group{
 		Name:            name,
 		MinimumSiteRole: minimumSiteRole,
 	}
+	groupRequest := GroupRequest{
+		Group: group,
+	}
 
-	newGroupJson, err := json.Marshal(newGroup)
+	updateGroupJson, err := json.Marshal(groupRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/groups/%s", c.ApiUrl, groupID), strings.NewReader(string(newGroupJson)))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/groups/%s", c.ApiUrl, groupID), strings.NewReader(string(updateGroupJson)))
 	if err != nil {
 		return nil, err
 	}

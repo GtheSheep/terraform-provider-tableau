@@ -1,3 +1,3 @@
 data "tableau_user" "example" {
-    user_id = "abc"
+    id = "abc"
 }

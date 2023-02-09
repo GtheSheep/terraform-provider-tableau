@@ -4,8 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -24,6 +27,7 @@ type groupUserResource struct {
 }
 
 type groupUserResourceModel struct {
+	ID          types.String `tfsdk:"id"`
 	GroupID     types.String `tfsdk:"group_id"`
 	UserID      types.String `tfsdk:"user_id"`
 	LastUpdated types.String `tfsdk:"last_updated"`
@@ -36,6 +40,12 @@ func (r *groupUserResource) Metadata(_ context.Context, req resource.MetadataReq
 func (r *groupUserResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"group_id": schema.StringAttribute{
 				Required:    true,
 				Description: "Group identifier",
@@ -60,7 +70,7 @@ func (r *groupUserResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	groupUser := User{
-		ID: string(plan.GroupID.ValueString()),
+		ID: string(plan.UserID.ValueString()),
 	}
 
 	_, err := r.client.CreateGroupUser(plan.GroupID.ValueString(), groupUser.ID)
@@ -72,6 +82,8 @@ func (r *groupUserResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	combinedID := GetCombinedID(plan.GroupID.ValueString(), groupUser.ID)
+	plan.ID = types.StringValue(combinedID)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	diags = resp.State.Set(ctx, plan)
@@ -89,7 +101,13 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	groupUser, err := r.client.GetGroupUser(state.GroupID.ValueString(), state.UserID.ValueString())
+	groupID := state.GroupID.ValueString()
+	userID := state.UserID.ValueString()
+	if (groupID == "") || (userID == "") {
+		groupID, userID = GetIDsFromCombinedID(state.ID.ValueString())
+	}
+
+	groupUser, err := r.client.GetGroupUser(groupID, userID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Tableau Group User",
@@ -98,6 +116,9 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	combinedID := GetCombinedID(groupID, userID)
+	state.ID = types.StringValue(combinedID)
+	state.GroupID = types.StringValue(groupID)
 	state.UserID = types.StringValue(groupUser.ID)
 
 	diags = resp.State.Set(ctx, &state)
@@ -136,4 +157,8 @@ func (r *groupUserResource) Configure(_ context.Context, req resource.ConfigureR
 	}
 
 	r.client = req.ProviderData.(*Client)
+}
+
+func (r *groupUserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

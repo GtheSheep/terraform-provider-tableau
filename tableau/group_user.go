@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+type GroupUserRequest struct {
+	User User `json:"user"`
+}
+
 type GroupUsersResponse struct {
 	Users []User `json:"user"`
 }
@@ -70,8 +74,11 @@ func (c *Client) CreateGroupUser(groupID, userID string) (*User, error) {
 	newGroupUser := User{
 		ID: userID,
 	}
+	groupUserRequest := GroupUserRequest{
+		User: newGroupUser,
+	}
 
-	newGroupUserJson, err := json.Marshal(newGroupUser)
+	newGroupUserJson, err := json.Marshal(groupUserRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +104,7 @@ func (c *Client) CreateGroupUser(groupID, userID string) (*User, error) {
 
 func (c *Client) DeleteGroupUser(groupID, userID string) error {
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/groups/%s/users", c.ApiUrl, groupID), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/groups/%s/users/%s", c.ApiUrl, groupID, userID), nil)
 	if err != nil {
 		return err
 	}

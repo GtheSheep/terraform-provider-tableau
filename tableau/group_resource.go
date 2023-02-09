@@ -5,15 +5,19 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var (
-	_ resource.Resource              = &groupResource{}
-	_ resource.ResourceWithConfigure = &groupResource{}
+	_ resource.Resource                = &groupResource{}
+	_ resource.ResourceWithConfigure   = &groupResource{}
+	_ resource.ResourceWithImportState = &groupResource{}
 )
 
 func NewGroupResource() resource.Resource {
@@ -38,12 +42,18 @@ func (r *groupResource) Metadata(_ context.Context, req resource.MetadataRequest
 func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: "Display name for group",
 			},
 			"minimum_site_role": schema.StringAttribute{
-				Required:    false,
+				Required:    true,
 				Description: "Minimum site role for the group",
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{
@@ -72,7 +82,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	group := NewGroup{
+	group := Group{
 		Name:            string(plan.Name.ValueString()),
 		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
 	}
@@ -113,8 +123,9 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
+	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
-	state.MinimumSiteRole = types.StringValue(group.MinimumSiteRole)
+	state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -131,7 +142,7 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	group := NewGroup{
+	group := Group{
 		Name:            string(plan.Name.ValueString()),
 		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
 	}
@@ -155,7 +166,7 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	plan.Name = types.StringValue(updatedGroup.Name)
-	plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
+	plan.MinimumSiteRole = types.StringValue(*updatedGroup.Import.MinimumSiteRole)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	diags = resp.State.Set(ctx, plan)
@@ -189,4 +200,8 @@ func (r *groupResource) Configure(_ context.Context, req resource.ConfigureReque
 	}
 
 	r.client = req.ProviderData.(*Client)
+}
+
+func (r *groupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

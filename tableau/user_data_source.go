@@ -22,8 +22,9 @@ type userDataSource struct {
 }
 
 type userDataSourceModel struct {
-	UserID      types.String `tfsdk:"user_id"`
+	ID          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
+	Email       types.String `tfsdk:"email"`
 	FullName    types.String `tfsdk:"full_name"`
 	SiteRole    types.String `tfsdk:"site_role"`
 	AuthSetting types.String `tfsdk:"auth_setting"`
@@ -37,7 +38,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Description: "Retrieve user details",
 		Attributes: map[string]schema.Attribute{
-			"user_id": schema.StringAttribute{
+			"id": schema.StringAttribute{
 				Required:    true,
 				Description: "ID of the user",
 			},
@@ -48,6 +49,10 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"full_name": schema.StringAttribute{
 				Computed:    true,
 				Description: "Full name for user",
+			},
+			"email": schema.StringAttribute{
+				Computed:    true,
+				Description: "User email",
 			},
 			"site_role": schema.StringAttribute{
 				Computed:    true,
@@ -66,7 +71,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 
-	user, err := d.client.GetUser(state.UserID.ValueString())
+	user, err := d.client.GetUser(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read Tableau User",
@@ -75,8 +80,9 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	state.UserID = types.StringValue(user.ID)
+	state.ID = types.StringValue(user.ID)
 	state.Name = types.StringValue(user.Name)
+	state.Email = types.StringValue(user.Email)
 	state.FullName = types.StringValue(user.FullName)
 	state.SiteRole = types.StringValue(user.SiteRole)
 	state.AuthSetting = types.StringValue(user.AuthSetting)

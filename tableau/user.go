@@ -3,18 +3,21 @@ package tableau
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 )
 
 type User struct {
-	ID          string `json:"id"`
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	FullName    string `json:"fullName"`
-	SiteRole    string `json:"siteRole"`
-	AuthSetting string `json:"authSetting"`
+	ID          string `json:"id,omitempty"`
+	Email       string `json:"email,omitempty"`
+	Name        string `json:"name,omitempty"`
+	FullName    string `json:"fullName,omitempty"`
+	SiteRole    string `json:"siteRole,omitempty"`
+	AuthSetting string `json:"authSetting,omitempty"`
+}
+
+type UserRequest struct {
+	User User `json:"user"`
 }
 
 type UserResponse struct {
@@ -22,7 +25,6 @@ type UserResponse struct {
 }
 
 func (c *Client) GetUser(userID string) (*User, error) {
-	log.Printf(fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID))
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s/", c.ApiUrl, userID), nil)
 	if err != nil {
 		return nil, err
@@ -51,8 +53,11 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 		SiteRole:    siteRole,
 		AuthSetting: authSetting,
 	}
+	userRequest := UserRequest{
+		User: newUser,
+	}
 
-	newUserJson, err := json.Marshal(newUser)
+	newUserJson, err := json.Marshal(userRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -83,13 +88,15 @@ func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, 
 		SiteRole:    siteRole,
 		AuthSetting: authSetting,
 	}
+	userRequest := UserRequest{
+		User: newUser,
+	}
 
-	newUserJson, err := json.Marshal(newUser)
+	newUserJson, err := json.Marshal(userRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf(string(newUserJson))
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/users/%s", c.ApiUrl, userID), strings.NewReader(string(newUserJson)))
 	if err != nil {
 		return nil, err

@@ -5,15 +5,19 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var (
-	_ resource.Resource              = &userResource{}
-	_ resource.ResourceWithConfigure = &userResource{}
+	_ resource.Resource                = &userResource{}
+	_ resource.ResourceWithConfigure   = &userResource{}
+	_ resource.ResourceWithImportState = &userResource{}
 )
 
 func NewUserResource() resource.Resource {
@@ -41,6 +45,12 @@ func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest,
 func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"email": schema.StringAttribute{
 				Required:    true,
 				Description: "User email",
@@ -51,7 +61,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			},
 			"full_name": schema.StringAttribute{
 				Required:    true,
-				Description: "Full name for user",
+				Description: "Full name for user - Note: Can't be updated due to permissioning when using SAML",
 			},
 			"site_role": schema.StringAttribute{
 				Required:    true,
@@ -76,7 +86,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 						"SAML",
 						"ServerDefault",
 						"OpenID",
-						"TABID_WITH_MFA",
+						"TableauIDWithMFA",
 					}...),
 				},
 			},
@@ -111,6 +121,14 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		)
 		return
 	}
+	_, err = r.client.UpdateUser(createdUser.ID, user.Name, user.SiteRole, user.AuthSetting)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating user during create",
+			"Could not update user during create create, unexpected error: "+err.Error(),
+		)
+		return
+	}
 
 	plan.ID = types.StringValue(createdUser.ID)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
@@ -139,6 +157,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
+	state.ID = types.StringValue(user.ID)
 	state.Email = types.StringValue(user.Email)
 	state.Name = types.StringValue(user.Name)
 	state.FullName = types.StringValue(user.FullName)
@@ -163,7 +182,6 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	user := User{
 		Email:       string(plan.Email.ValueString()),
 		Name:        string(plan.Name.ValueString()),
-		FullName:    string(plan.FullName.ValueString()),
 		SiteRole:    string(plan.SiteRole.ValueString()),
 		AuthSetting: string(plan.AuthSetting.ValueString()),
 	}
@@ -222,4 +240,8 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 	}
 
 	r.client = req.ProviderData.(*Client)
+}
+
+func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
