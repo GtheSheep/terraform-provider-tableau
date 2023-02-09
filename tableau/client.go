@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -85,7 +84,6 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		}
 
 		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.Site.ID)
-		log.Printf(c.ApiUrl)
 		c.AuthToken = ar.SignInResponseData.Token
 	}
 
