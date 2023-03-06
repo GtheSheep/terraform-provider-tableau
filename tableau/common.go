@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+type PaginationDetails struct {
+	PageNumber     string `json:"pageNumber"`
+	PageSize       string `json:"pageSize"`
+	TotalAvailable string `json:"totalAvailable"`
+}
+
 func GetPaginationNumbers(paginationDetails PaginationDetails) (int, int, error) {
 	pageNumber, err := strconv.Atoi(paginationDetails.PageNumber)
 	if err != nil {
