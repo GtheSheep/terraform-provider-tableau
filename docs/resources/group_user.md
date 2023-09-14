@@ -26,3 +26,10 @@ description: |-
 - `last_updated` (String)
 
 
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import group_user.example "group_id:user_id"
+```

@@ -59,7 +59,10 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					stringvalidator.OneOf([]string{
 						"Creator",
 						"Explorer",
+						"Interactor",
+						"Publisher",
 						"ExplorerCanPublish",
+						"ServerAdministrator",
 						"SiteAdministratorExplorer",
 						"SiteAdministratorCreator",
 						"Unlicensed",
