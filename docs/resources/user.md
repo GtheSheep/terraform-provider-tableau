@@ -28,4 +28,10 @@ description: |-
 - `id` (String) The ID of this resource.
 - `last_updated` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import tableau_user.example "user_id"
+```
