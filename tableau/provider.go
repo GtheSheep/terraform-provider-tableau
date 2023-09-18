@@ -217,14 +217,6 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
-	if site == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("site"),
-			"Missing Tableau Site",
-			"Tableau Site must be provided in order to establish a connection",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
