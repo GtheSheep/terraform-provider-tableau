@@ -81,6 +81,12 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 		if err != nil {
 			return nil, err
 		}
+		// check if we found the group in this page
+		for i, group := range groupListResponse.GroupsResponse.Groups {
+			if group.ID == groupID {
+				return &groupListResponse.GroupsResponse.Groups[i], nil
+			}
+		}
 	}
 
 	return nil, fmt.Errorf("Did not find group ID %s", groupID)
