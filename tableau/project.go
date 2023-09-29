@@ -76,6 +76,12 @@ func (c *Client) GetProject(projectID string) (*Project, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Check page for project match
+		for i, project := range projectListResponse.ProjectsResponse.Projects {
+			if project.ID == projectID {
+				return &projectListResponse.ProjectsResponse.Projects[i], nil
+			}
+		}
 	}
 
 	return nil, fmt.Errorf("Did not find project ID %s", projectID)
