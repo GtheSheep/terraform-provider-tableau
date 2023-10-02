@@ -64,6 +64,12 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Check this page of data for the GroupUser match
+		for i, user := range groupUsersListResponse.GroupUsersResponse.Users {
+			if user.ID == userID {
+				return &groupUsersListResponse.GroupUsersResponse.Users[i], nil
+			}
+		}
 	}
 
 	return nil, fmt.Errorf("Did not find user ID %s in group ID %s", userID, groupID)
