@@ -128,7 +128,12 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
-	state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
+
+	if group.Import != nil && group.Import.MinimumSiteRole != nil {
+		state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
+	} else {
+		state.MinimumSiteRole = types.StringNull()
+	}
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
