@@ -151,14 +151,12 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	user, err := r.client.GetUser(state.ID.ValueString())
+
+	user, err := r.client.GetUser(state.ID.ValueString()) // check to see if user exists
 	if err != nil {
+		// user doesn't exist so recreate it and fetch the new ID
 		user, err = r.client.CreateUser(state.Email.ValueString(), state.Name.ValueString(), state.FullName.ValueString(), state.SiteRole.ValueString(), state.AuthSetting.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError(
-				"Error re-creating user state",
-				"Could not re-create user, unexpected error: "+err.Error(),
-			)
 			return
 		}
 	}
