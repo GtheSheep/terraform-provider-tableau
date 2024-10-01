@@ -154,7 +154,6 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	user, err := r.client.GetUser(state.ID.ValueString()) // check to see if user exists
 	if err != nil {
-		// user doesn't exist so recreate it and fetch the new ID
 		user, err = r.client.CreateUser(state.Email.ValueString(), state.Name.ValueString(), state.FullName.ValueString(), state.SiteRole.ValueString(), state.AuthSetting.ValueString())
 		if err != nil {
 			return
