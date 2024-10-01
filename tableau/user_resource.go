@@ -153,11 +153,14 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	user, err := r.client.GetUser(state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau User",
-			"Could not read Tableau user ID "+state.ID.ValueString()+": "+err.Error(),
-		)
-		return
+		user, err = r.client.CreateUser(state.Email.ValueString(), state.Name.ValueString(), state.FullName.ValueString(), state.SiteRole.ValueString(), state.AuthSetting.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error re-creating user state",
+				"Could not re-create user, unexpected error: "+err.Error(),
+			)
+			return
+		}
 	}
 
 	state.ID = types.StringValue(user.ID)
