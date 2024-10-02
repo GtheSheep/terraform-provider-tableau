@@ -151,13 +151,10 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-
 	user, err := r.client.GetUser(state.ID.ValueString()) // check to see if user exists
 	if err != nil {
-		user, err = r.client.CreateUser(state.Email.ValueString(), state.Name.ValueString(), state.FullName.ValueString(), state.SiteRole.ValueString(), state.AuthSetting.ValueString())
-		if err != nil {
-			return
-		}
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	state.ID = types.StringValue(user.ID)
