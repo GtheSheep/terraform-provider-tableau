@@ -119,11 +119,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	group, err := r.client.GetGroup(state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau Group",
-			"Could not read Tableau group ID "+state.ID.ValueString()+": "+err.Error(),
-		)
-		return
+		resp.State.RemoveResource(ctx)
 	}
 
 	state.ID = types.StringValue(group.ID)

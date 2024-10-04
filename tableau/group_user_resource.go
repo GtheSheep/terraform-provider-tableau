@@ -109,11 +109,7 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	groupUser, err := r.client.GetGroupUser(groupID, userID)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau Group User",
-			"Could not read Tableau Group ID/ User ID "+state.GroupID.ValueString()+"/"+state.UserID.ValueString()+": "+err.Error(),
-		)
-		return
+		resp.State.RemoveResource(ctx)
 	}
 
 	combinedID := GetCombinedID(groupID, userID)
