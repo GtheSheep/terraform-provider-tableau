@@ -124,10 +124,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	project, err := r.client.GetProject(state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau Project",
-			"Could not read Tableau project ID "+state.ID.ValueString()+": "+err.Error(),
-		)
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
