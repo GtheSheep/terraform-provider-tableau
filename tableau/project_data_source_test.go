@@ -26,10 +26,10 @@ func TestAccProjectDataSource(t *testing.T) {
                     id = tableau_project.test.id
                 }`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.tableau_group.test", "name", "test"),
-					resource.TestCheckResourceAttr("data.tableau_group.test", "content_permissions", "ManagedByOwner"),
-					resource.TestCheckResourceAttr("data.tableau_group.test", "description", "Moo"),
-					resource.TestCheckResourceAttrSet("data.tableau_group.test", "parent_project_id"),
+					resource.TestCheckResourceAttr("data.tableau_project.test", "name", "test"),
+					resource.TestCheckResourceAttr("data.tableau_project.test", "content_permissions", "ManagedByOwner"),
+					resource.TestCheckResourceAttr("data.tableau_project.test", "description", "Moo"),
+					resource.TestCheckResourceAttrSet("data.tableau_project.test", "parent_project_id"),
 				),
 			},
 		},

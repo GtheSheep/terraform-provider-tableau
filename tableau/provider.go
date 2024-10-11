@@ -251,6 +251,7 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 		GroupDataSource,
 		UserDataSource,
 		ProjectDataSource,
+		SiteDataSource,
 	}
 }
 
@@ -260,5 +261,6 @@ func (p *tableauProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewGroupResource,
 		NewGroupUserResource,
 		NewProjectResource,
+		NewSiteResource,
 	}
 }
