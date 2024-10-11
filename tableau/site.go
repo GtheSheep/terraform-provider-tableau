@@ -9,9 +9,9 @@ import (
 )
 
 type Site struct {
-	ID                 string `json:"id,omitempty"`
-	Name               string `json:"name,omitempty"`
-	ContentURL    string `json:"contentUrl,omitempty"`
+	ID         string `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	ContentURL string `json:"contentUrl,omitempty"`
 }
 
 type SiteRequest struct {
@@ -27,8 +27,8 @@ type SitesResponse struct {
 }
 
 type SiteListResponse struct {
-	SitesResponse SitesResponse  `json:"sites"`
-	Pagination       PaginationDetails `json:"pagination"`
+	SitesResponse SitesResponse     `json:"sites"`
+	Pagination    PaginationDetails `json:"pagination"`
 }
 
 func (c *Client) GetSite(siteID string) (*Site, error) {
@@ -88,8 +88,8 @@ func (c *Client) GetSite(siteID string) (*Site, error) {
 func (c *Client) CreateSite(name, contentURL string) (*Site, error) {
 
 	newSite := Site{
-		Name:               name,
-		ContentURL:    contentURL,
+		Name:       name,
+		ContentURL: contentURL,
 	}
 	siteRequest := SiteRequest{
 		Site: newSite,
@@ -122,8 +122,8 @@ func (c *Client) CreateSite(name, contentURL string) (*Site, error) {
 func (c *Client) UpdateSite(siteID, name, contentURL string) (*Site, error) {
 
 	newSite := Site{
-		Name:               name,
-		ContentURL:    contentURL,
+		Name:       name,
+		ContentURL: contentURL,
 	}
 	siteRequest := SiteRequest{
 		Site: newSite,

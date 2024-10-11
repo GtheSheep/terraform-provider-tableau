@@ -22,9 +22,9 @@ type siteDataSource struct {
 }
 
 type siteDataSourceModel struct {
-	ID                 types.String `tfsdk:"id"`
-	Name               types.String `tfsdk:"name"`
-	ContentURL        types.String `tfsdk:"content_url"`
+	ID         types.String `tfsdk:"id"`
+	Name       types.String `tfsdk:"name"`
+	ContentURL types.String `tfsdk:"content_url"`
 }
 
 func (d *siteDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {

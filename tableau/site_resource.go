@@ -4,13 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -29,10 +27,10 @@ type siteResource struct {
 }
 
 type siteResourceModel struct {
-	ID                 types.String `tfsdk:"id"`
-	Name               types.String `tfsdk:"name"`
-	ContentURL    types.String `tfsdk:"content_url"`
-	LastUpdated        types.String `tfsdk:"last_updated"`
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	ContentURL  types.String `tfsdk:"content_url"`
+	LastUpdated types.String `tfsdk:"last_updated"`
 }
 
 func (r *siteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -72,8 +70,8 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	site := Site{
-		Name:               string(plan.Name.ValueString()),
-		ContentURL:    string(plan.ContentURL.ValueString()),
+		Name:       string(plan.Name.ValueString()),
+		ContentURL: string(plan.ContentURL.ValueString()),
 	}
 
 	createdSite, err := r.client.CreateSite(site.Name, site.ContentURL)
@@ -129,8 +127,8 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	site := Site{
-		Name:               string(plan.Name.ValueString()),
-		ContentURL:    string(plan.ContentURL.ValueString()),
+		Name:       string(plan.Name.ValueString()),
+		ContentURL: string(plan.ContentURL.ValueString()),
 	}
 
 	_, err := r.client.UpdateSite(plan.ID.ValueString(), site.Name, site.ContentURL)

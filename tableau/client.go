@@ -15,17 +15,17 @@ type Client struct {
 	AuthToken  string
 }
 
-type Site struct {
+type SiteDetails struct {
 	ID         *string `json:"id"`
 	ContentUrl string  `json:"contentUrl"`
 }
 
 type Credentials struct {
-	Name        *string `json:"name"`
-	Password    *string `json:"password"`
-	TokenName   *string `json:"personalAccessTokenName"`
-	TokenSecret *string `json:"personalAccessTokenSecret"`
-	Site        Site    `json:"site"`
+	Name        *string     `json:"name"`
+	Password    *string     `json:"password"`
+	TokenName   *string     `json:"personalAccessTokenName"`
+	TokenSecret *string     `json:"personalAccessTokenSecret"`
+	SiteDetails SiteDetails `json:"site"`
 }
 
 type SignInRequest struct {
@@ -33,10 +33,10 @@ type SignInRequest struct {
 }
 
 type SignInResponseData struct {
-	Site                      Site   `json:"site"`
-	User                      User   `json:"user"`
-	Token                     string `json:"token"`
-	EstimatedTimeToExpiration string `json:"estimatedTimeToExpiration"`
+	SiteDetails               SiteDetails `json:"site"`
+	User                      User        `json:"user"`
+	Token                     string      `json:"token"`
+	EstimatedTimeToExpiration string      `json:"estimatedTimeToExpiration"`
 }
 
 type SignInResponse struct {
@@ -52,13 +52,13 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		baseUrl := fmt.Sprintf("%s/api/%s", *server, *serverVersion)
 		url := fmt.Sprintf("%s/auth/signin", baseUrl)
 
-		siteStruct := Site{ContentUrl: *site}
+		siteStruct := SiteDetails{ContentUrl: *site}
 		credentials := Credentials{
 			Name:        username,
 			Password:    password,
 			TokenName:   personalAccessTokenName,
 			TokenSecret: personalAccessTokenSecret,
-			Site:        siteStruct,
+			SiteDetails: siteStruct,
 		}
 		authRequest := SignInRequest{
 			Credentials: credentials,
@@ -83,7 +83,7 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 			return nil, err
 		}
 
-		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.Site.ID)
+		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.SiteDetails.ID)
 		c.AuthToken = ar.SignInResponseData.Token
 	}
 
