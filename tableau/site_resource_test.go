@@ -1,7 +1,7 @@
 package tableau
 
 import (
-	"strings"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,11 +11,11 @@ func TestAccSiteResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		ErrorCheck: func(err error) error {
-			if strings.Contains(err.Error(), "Resource Not Found") {
+			_, runningServerTests := os.LookupEnv("TF_ACC_SERVER")
+			if !runningServerTests {
 			   return nil
 			}
-		
-			// return original error if no match
+
 			return err
 		},
 		Steps: []resource.TestStep{
