@@ -19,3 +19,8 @@ jobs:
         run: make setup
       - name: make ${{ matrix.target }}
         run: make ${{ matrix.target }}
+        env:
+          TABLEAU_SERVER_URL: ${{ secrets.TEST_TABLEAU_HOST }}
+          TABLEAU_SITE_NAME: ${{ secrets.TEST_TABLEAU_SITE_NAME }}
+          TABLEAU_PERSONAL_ACCESS_TOKEN_NAME: ${{ secrets.TEST_TABLEAU_PERSONAL_ACCESS_TOKEN_NAME }}
+          TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET: ${{ secrets.TEST_TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET }}
