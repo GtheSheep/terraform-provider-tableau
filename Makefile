@@ -25,6 +25,9 @@ test: deps
 test-acceptance: deps
 	TF_ACC=1 go test -mod=readonly -count=1 -v ./tableau
 
+test-acceptance-server: deps
+	TF_ACC=1 TF_ACC_SERVER=1 go test -mod=readonly -count=1 -v ./tableau
+
 check-docs: docs
 	git diff --exit-code -- docs
 
