@@ -10,12 +10,21 @@ jobs:
         target:
           - check-docs
           - test
+          - test-acceptance
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
+          go-version: '1.23'
+
       - name: Install dependencies
         run: make setup
+
       - name: make ${{ matrix.target }}
         run: make ${{ matrix.target }}
+        env:
+          TABLEAU_SERVER_URL: ${{ secrets.TEST_TABLEAU_HOST }}
+          TABLEAU_SITE_NAME: ${{ secrets.TEST_TABLEAU_SITE_NAME }}
+          TABLEAU_SERVER_VERSION: ${{ secrets.TEST_TABLEAU_SERVER_VERSION }}
+          TABLEAU_PERSONAL_ACCESS_TOKEN_NAME: ${{ secrets.TEST_TABLEAU_PERSONAL_ACCESS_TOKEN_NAME }}
+          TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET: ${{ secrets.TEST_TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET }}
