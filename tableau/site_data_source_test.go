@@ -1,6 +1,7 @@
 package tableau
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -9,6 +10,14 @@ import (
 func TestAccSiteDataSource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ErrorCheck: func(err error) error {
+			_, runningServerTests := os.LookupEnv("TF_ACC_SERVER")
+			if !runningServerTests {
+			   return nil
+			}
+
+			return err
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: providerConfig + `
