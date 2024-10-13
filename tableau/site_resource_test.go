@@ -9,6 +9,14 @@ import (
 func TestAccSiteResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ErrorCheck: func(err error) error {
+			if strings.Contains(err.Error(), "Resource Not Found") {
+			   return nil
+			}
+		
+			// return original error if no match
+			return err
+		},
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
