@@ -8,16 +8,11 @@ import (
 )
 
 func TestAccSiteResource(t *testing.T) {
+	if os.Getenv("TF_ACC_SERVER") == "" {
+		t.Skip("TF_ACC_SERVER must be set for site acceptance tests")
+	}
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		ErrorCheck: func(err error) error {
-			_, runningServerTests := os.LookupEnv("TF_ACC_SERVER")
-			if !runningServerTests {
-			   return nil
-			}
-
-			return err
-		},
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{

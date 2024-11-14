@@ -25,5 +25,3 @@ Retrieve project details
 - `description` (String) Description for the project
 - `name` (String) Name for the project
 - `parent_project_id` (String) Identifier for the parent project
-
-

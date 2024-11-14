@@ -23,5 +23,3 @@ Retrieve group details
 
 - `minimum_site_role` (String) Minimum site role for the group
 - `name` (String) Name for the group
-
-

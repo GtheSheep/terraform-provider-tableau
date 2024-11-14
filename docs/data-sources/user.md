@@ -26,5 +26,3 @@ Retrieve user details
 - `full_name` (String) Full name for user
 - `name` (String) Name for the user
 - `site_role` (String) Site role for the user
-
-

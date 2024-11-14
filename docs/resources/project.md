@@ -23,17 +23,10 @@ description: |-
 ### Optional
 
 - `description` (String) Description for the project
+- `owner_id` (String) Identifier for the project owner
 - `parent_project_id` (String) Identifier for the parent project
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `last_updated` (String)
-
-## Import
-
-Import is supported using the following syntax:
-
-```shell
-terraform import tableau_project.example "project_id"
-```
+- `last_updated` (String) Timestamp of the last Terraform update of the project

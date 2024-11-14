@@ -50,7 +50,7 @@ resource "tableau_user" "test" {
               name = "test@test.test"
               full_name = "test@test.test"
               email = "test@test.test"
-              site_role = "Unlicensed"
+              site_role = "Viewer"
               auth_setting = "ServerDefault"
             }
 			`,
@@ -65,7 +65,7 @@ resource "tableau_user" "test" {
 					resource.TestCheckResourceAttr("tableau_user.test", "name", "test@test.test"),
 					resource.TestCheckResourceAttr("tableau_user.test", "full_name", "test@test.test"),
 					resource.TestCheckResourceAttr("tableau_user.test", "email", "test@test.test"),
-					resource.TestCheckResourceAttr("tableau_user.test", "site_role", "Unlicensed"),
+					resource.TestCheckResourceAttr("tableau_user.test", "site_role", "Viewer"),
 					resource.TestCheckResourceAttr("tableau_user.test", "auth_setting", "ServerDefault"),
 				),
 			},
