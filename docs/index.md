@@ -30,5 +30,5 @@ provider "tableau" {
 - `personal_access_token_secret` (String, Sensitive) Personal access token secret - TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET env var
 - `server_url` (String) URL of your Tableau server - TABLEAU_SERVER_URL env var
 - `server_version` (String) Version of the server identified in URL - TABLEAU_SERVER_VERSION env var
-- `site` (String) Site name from your Tableau URL - TABLEAU_SITE_NAME env var - for Tableau Server default sites leave as ""
+- `site` (String) Site name from your Tableau URL - TABLEAU_SITE_NAME env var - for Tableau Server default sites leave as ''
 - `username` (String) Login Username - TABLEAU_USERNAME env var

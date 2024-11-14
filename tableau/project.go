@@ -6,14 +6,20 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
+type ProjectOwner struct {
+	ID string `json:"id,omitempty"`
+}
+
 type Project struct {
-	ID                 string `json:"id,omitempty"`
-	Name               string `json:"name,omitempty"`
-	ParentProjectID    string `json:"parentProjectId,omitempty"`
-	Description        string `json:"description,omitempty"`
-	ContentPermissions string `json:"contentPermissions,omitempty"`
+	ID                 string       `json:"id,omitempty"`
+	Name               string       `json:"name,omitempty"`
+	ParentProjectID    string       `json:"parentProjectId,omitempty"`
+	Description        string       `json:"description,omitempty"`
+	ContentPermissions string       `json:"contentPermissions,omitempty"`
+	Owner              ProjectOwner `json:"owner,omitempty"`
 }
 
 type ProjectRequest struct {
@@ -87,13 +93,19 @@ func (c *Client) GetProject(projectID string) (*Project, error) {
 	return nil, fmt.Errorf("Did not find project ID %s", projectID)
 }
 
-func (c *Client) CreateProject(name, parentProjectId, description, contentPermissions string) (*Project, error) {
+func (c *Client) CreateProject(name, parentProjectId, description, contentPermissions, ownerId string) (*Project, error) {
 
 	newProject := Project{
 		Name:               name,
 		ParentProjectID:    parentProjectId,
 		Description:        description,
 		ContentPermissions: contentPermissions,
+	}
+	if ownerId != "" {
+		newOwner := ProjectOwner{
+			ID: ownerId,
+		}
+		newProject.Owner = newOwner
 	}
 	projectRequest := ProjectRequest{
 		Project: newProject,
@@ -120,16 +132,20 @@ func (c *Client) CreateProject(name, parentProjectId, description, contentPermis
 		return nil, err
 	}
 
+	time.Sleep(1 * time.Second)
 	return &projectResponse.Project, nil
 }
 
-func (c *Client) UpdateProject(projectID, name, parentProjectId, description, contentPermissions string) (*Project, error) {
-
+func (c *Client) UpdateProject(projectID, name, parentProjectId, description, contentPermissions, ownerId string) (*Project, error) {
+	newOwner := ProjectOwner{
+		ID: ownerId,
+	}
 	newProject := Project{
 		Name:               name,
 		ParentProjectID:    parentProjectId,
 		Description:        description,
 		ContentPermissions: contentPermissions,
+		Owner:              newOwner,
 	}
 	projectRequest := ProjectRequest{
 		Project: newProject,

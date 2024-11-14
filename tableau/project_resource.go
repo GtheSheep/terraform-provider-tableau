@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,6 +35,7 @@ type projectResourceModel struct {
 	ParentProjectID    types.String `tfsdk:"parent_project_id"`
 	Description        types.String `tfsdk:"description"`
 	ContentPermissions types.String `tfsdk:"content_permissions"`
+	OwnerID            types.String `tfsdk:"owner_id"`
 	LastUpdated        types.String `tfsdk:"last_updated"`
 }
 
@@ -60,7 +62,9 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"description": schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: "Description for the project",
+				Default:     stringdefault.StaticString(""),
 			},
 			"content_permissions": schema.StringAttribute{
 				Required:    true,
@@ -73,8 +77,20 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					}...),
 				},
 			},
+			"owner_id": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Identifier for the project owner",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"last_updated": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Timestamp of the last Terraform update of the project",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
@@ -90,12 +106,17 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	project := Project{
 		Name:               string(plan.Name.ValueString()),
-		ParentProjectID:    string(plan.ParentProjectID.ValueString()),
 		Description:        string(plan.Description.ValueString()),
 		ContentPermissions: string(plan.ContentPermissions.ValueString()),
 	}
+	if plan.ParentProjectID.ValueString() != "" {
+		project.ParentProjectID = string(plan.ParentProjectID.ValueString())
+	}
+	if plan.OwnerID.ValueString() != "" {
+		project.Owner.ID = string(plan.OwnerID.ValueString())
+	}
 
-	createdProject, err := r.client.CreateProject(project.Name, project.ParentProjectID, project.Description, project.ContentPermissions)
+	createdProject, err := r.client.CreateProject(project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating project",
@@ -105,6 +126,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	plan.ID = types.StringValue(createdProject.ID)
+	plan.OwnerID = types.StringValue(createdProject.Owner.ID)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	diags = resp.State.Set(ctx, plan)
@@ -130,7 +152,10 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	state.ID = types.StringValue(project.ID)
 	state.Name = types.StringValue(project.Name)
-	state.ParentProjectID = types.StringValue(project.ParentProjectID)
+	if project.ParentProjectID != "" {
+		state.ParentProjectID = types.StringValue(project.ParentProjectID)
+	}
+	state.OwnerID = types.StringValue(project.Owner.ID)
 	state.Description = types.StringValue(project.Description)
 	state.ContentPermissions = types.StringValue(project.ContentPermissions)
 
@@ -151,12 +176,17 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	project := Project{
 		Name:               string(plan.Name.ValueString()),
-		ParentProjectID:    string(plan.ParentProjectID.ValueString()),
 		Description:        string(plan.Description.ValueString()),
 		ContentPermissions: string(plan.ContentPermissions.ValueString()),
 	}
+	if plan.ParentProjectID.ValueString() != "" {
+		project.ParentProjectID = string(plan.ParentProjectID.ValueString())
+	}
+	if plan.OwnerID.ValueString() != "" {
+		project.Owner.ID = string(plan.OwnerID.ValueString())
+	}
 
-	_, err := r.client.UpdateProject(plan.ID.ValueString(), project.Name, project.ParentProjectID, project.Description, project.ContentPermissions)
+	_, err := r.client.UpdateProject(plan.ID.ValueString(), project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Tableau Project",
@@ -175,7 +205,10 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	plan.Name = types.StringValue(updatedProject.Name)
-	plan.ParentProjectID = types.StringValue(updatedProject.ParentProjectID)
+	if project.ParentProjectID != "" {
+		plan.ParentProjectID = types.StringValue(updatedProject.ParentProjectID)
+	}
+	plan.OwnerID = types.StringValue(updatedProject.Owner.ID)
 	plan.Description = types.StringValue(updatedProject.Description)
 	plan.ContentPermissions = types.StringValue(updatedProject.ContentPermissions)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
