@@ -59,7 +59,7 @@ func (p *tableauProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 			},
 			"site": schema.StringAttribute{
 				Optional:    true,
-				Description: "Site name from your Tableau URL - TABLEAU_SITE_NAME env var",
+				Description: "Site name from your Tableau URL - TABLEAU_SITE_NAME env var - for Tableau Server default sites leave as ''",
 			},
 		},
 	}
@@ -262,5 +262,6 @@ func (p *tableauProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewGroupUserResource,
 		NewProjectResource,
 		NewSiteResource,
+		NewProjectPermissionResource,
 	}
 }
