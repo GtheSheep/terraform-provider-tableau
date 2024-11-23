@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type Owner struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
 type PaginationDetails struct {
 	PageNumber     string `json:"pageNumber"`
 	PageSize       string `json:"pageSize"`

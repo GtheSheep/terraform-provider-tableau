@@ -9,17 +9,13 @@ import (
 	"time"
 )
 
-type ProjectOwner struct {
-	ID string `json:"id,omitempty"`
-}
-
 type Project struct {
-	ID                 string       `json:"id,omitempty"`
-	Name               string       `json:"name,omitempty"`
-	ParentProjectID    string       `json:"parentProjectId,omitempty"`
-	Description        string       `json:"description,omitempty"`
-	ContentPermissions string       `json:"contentPermissions,omitempty"`
-	Owner              ProjectOwner `json:"owner,omitempty"`
+	ID                 string `json:"id,omitempty"`
+	Name               string `json:"name,omitempty"`
+	ParentProjectID    string `json:"parentProjectId,omitempty"`
+	Description        string `json:"description,omitempty"`
+	ContentPermissions string `json:"contentPermissions,omitempty"`
+	Owner              Owner  `json:"owner,omitempty"`
 }
 
 type ProjectRequest struct {
@@ -102,7 +98,7 @@ func (c *Client) CreateProject(name, parentProjectId, description, contentPermis
 		ContentPermissions: contentPermissions,
 	}
 	if ownerId != "" {
-		newOwner := ProjectOwner{
+		newOwner := Owner{
 			ID: ownerId,
 		}
 		newProject.Owner = newOwner
@@ -137,7 +133,7 @@ func (c *Client) CreateProject(name, parentProjectId, description, contentPermis
 }
 
 func (c *Client) UpdateProject(projectID, name, parentProjectId, description, contentPermissions, ownerId string) (*Project, error) {
-	newOwner := ProjectOwner{
+	newOwner := Owner{
 		ID: ownerId,
 	}
 	newProject := Project{

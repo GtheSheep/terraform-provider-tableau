@@ -252,6 +252,7 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 		UserDataSource,
 		ProjectDataSource,
 		SiteDataSource,
+		DatasourceDataSource,
 	}
 }
 
