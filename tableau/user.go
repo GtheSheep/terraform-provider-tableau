@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -22,6 +23,66 @@ type UserRequest struct {
 
 type UserResponse struct {
 	User User `json:"user"`
+}
+
+type UsersResponse struct {
+	Users []User `json:"user"`
+}
+
+type UserListResponse struct {
+	UsersResponse UsersResponse     `json:"users"`
+	Pagination    PaginationDetails `json:"pagination"`
+}
+
+func (c *Client) GetUsers() ([]User, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/users", c.ApiUrl), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	userListResponse := UserListResponse{}
+	err = json.Unmarshal(body, &userListResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Generalise pagination handling and use elsewhere
+	pageNumber, totalPageCount, totalAvailable, err := GetPaginationNumbers(userListResponse.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	allUsers := make([]User, 0, totalAvailable)
+	for _, user := range userListResponse.UsersResponse.Users {
+		allUsers = append(allUsers, user)
+	}
+
+	for page := pageNumber + 1; page <= totalPageCount; page++ {
+		fmt.Printf("Searching page %d", page)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/users?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err = c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+		userListResponse = UserListResponse{}
+		err = json.Unmarshal(body, &userListResponse)
+		if err != nil {
+			return nil, err
+		}
+		for _, user := range userListResponse.UsersResponse.Users {
+			allUsers = append(allUsers, user)
+		}
+	}
+
+	return allUsers, nil
 }
 
 func (c *Client) GetUser(userID string) (*User, error) {
