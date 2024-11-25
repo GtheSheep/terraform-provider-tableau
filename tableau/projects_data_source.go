@@ -42,7 +42,7 @@ func (d *projectsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ID of the project",
+				Description: "ID of the list of projects",
 			},
 			"projects": schema.ListNestedAttribute{
 				Description: "List of projects and their attributes",

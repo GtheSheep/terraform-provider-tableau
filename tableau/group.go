@@ -38,6 +38,57 @@ type GroupListResponse struct {
 	Pagination     PaginationDetails `json:"pagination"`
 }
 
+func (c *Client) GetGroups() ([]Group, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/groups", c.ApiUrl), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	groupListResponse := GroupListResponse{}
+	err = json.Unmarshal(body, &groupListResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Generalise pagination handling and use elsewhere
+	pageNumber, totalPageCount, totalAvailable, err := GetPaginationNumbers(groupListResponse.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	allGroups := make([]Group, 0, totalAvailable)
+	for _, group := range groupListResponse.GroupsResponse.Groups {
+		allGroups = append(allGroups, group)
+	}
+
+	for page := pageNumber + 1; page <= totalPageCount; page++ {
+		fmt.Printf("Searching page %d", page)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err = c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+		groupListResponse = GroupListResponse{}
+		err = json.Unmarshal(body, &groupListResponse)
+		if err != nil {
+			return nil, err
+		}
+		for _, group := range groupListResponse.GroupsResponse.Groups {
+			allGroups = append(allGroups, group)
+		}
+	}
+
+	return allGroups, nil
+}
+
 func (c *Client) GetGroup(groupID string) (*Group, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/groups", c.ApiUrl), nil)
 	if err != nil {

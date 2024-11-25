@@ -17,7 +17,7 @@ Retrieve project details as a list of projects available to read
 
 ### Read-Only
 
-- `id` (String) ID of the project
+- `id` (String) ID of the list of projects
 - `projects` (Attributes List) List of projects and their attributes (see [below for nested schema](#nestedatt--projects))
 
 <a id="nestedatt--projects"></a>

@@ -249,6 +249,7 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		GroupDataSource,
+		GroupsDataSource,
 		UserDataSource,
 		ProjectDataSource,
 		ProjectsDataSource,

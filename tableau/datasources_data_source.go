@@ -44,7 +44,7 @@ func (d *datasourcesDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ID of the project",
+				Description: "ID of the list of datasources",
 			},
 			"datasources": schema.ListNestedAttribute{
 				Description: "List of datasources and their attributes",
@@ -86,7 +86,7 @@ func (d *datasourcesDataSource) Read(ctx context.Context, req datasource.ReadReq
 	datasources, err := d.client.GetDatasources()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read Tableau Datasource",
+			"Unable to Read Tableau Datasources",
 			err.Error(),
 		)
 		return

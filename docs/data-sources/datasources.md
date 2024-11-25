@@ -18,7 +18,7 @@ Retrieve datasource details as a list of datasources available to read
 ### Read-Only
 
 - `datasources` (Attributes List) List of datasources and their attributes (see [below for nested schema](#nestedatt--datasources))
-- `id` (String) ID of the project
+- `id` (String) ID of the list of datasources
 
 <a id="nestedatt--datasources"></a>
 ### Nested Schema for `datasources`
