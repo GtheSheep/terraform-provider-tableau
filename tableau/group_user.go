@@ -39,7 +39,7 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 	}
 
 	// TODO: Generalise pagination handling and use elsewhere
-	pageNumber, totalPageCount, err := GetPaginationNumbers(groupUsersListResponse.Pagination)
+	pageNumber, totalPageCount, _, err := GetPaginationNumbers(groupUsersListResponse.Pagination)
 	if err != nil {
 		return nil, err
 	}

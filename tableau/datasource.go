@@ -69,7 +69,7 @@ func (c *Client) GetDatasource(datasourceID, name string) (*Datasource, error) {
 	}
 
 	// TODO: Generalise pagination handling and use elsewhere
-	pageNumber, totalPageCount, err := GetPaginationNumbers(datasourceListResponse.Pagination)
+	pageNumber, totalPageCount, _, err := GetPaginationNumbers(datasourceListResponse.Pagination)
 	if err != nil {
 		return nil, err
 	}

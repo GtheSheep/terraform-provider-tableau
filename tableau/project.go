@@ -35,6 +35,56 @@ type ProjectListResponse struct {
 	Pagination       PaginationDetails `json:"pagination"`
 }
 
+func (c *Client) GetProjects() ([]Project, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/projects", c.ApiUrl), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	projectListResponse := ProjectListResponse{}
+	err = json.Unmarshal(body, &projectListResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	pageNumber, totalPageCount, totalAvailable, err := GetPaginationNumbers(projectListResponse.Pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	allProjects := make([]Project, 0, totalAvailable)
+	for _, project := range projectListResponse.ProjectsResponse.Projects {
+		allProjects = append(allProjects, project)
+	}
+
+	for page := pageNumber + 1; page <= totalPageCount; page++ {
+		fmt.Printf("Searching page %d", page)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/projects?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		if err != nil {
+			return nil, err
+		}
+		body, err = c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+		projectListResponse = ProjectListResponse{}
+		err = json.Unmarshal(body, &projectListResponse)
+		if err != nil {
+			return nil, err
+		}
+		for _, project := range projectListResponse.ProjectsResponse.Projects {
+			allProjects = append(allProjects, project)
+		}
+	}
+
+	return allProjects, nil
+}
+
 func (c *Client) GetProject(projectID string) (*Project, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/projects", c.ApiUrl), nil)
 	if err != nil {
@@ -53,7 +103,7 @@ func (c *Client) GetProject(projectID string) (*Project, error) {
 	}
 
 	// TODO: Generalise pagination handling and use elsewhere
-	pageNumber, totalPageCount, err := GetPaginationNumbers(projectListResponse.Pagination)
+	pageNumber, totalPageCount, _, err := GetPaginationNumbers(projectListResponse.Pagination)
 	if err != nil {
 		return nil, err
 	}

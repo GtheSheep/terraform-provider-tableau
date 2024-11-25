@@ -49,7 +49,7 @@ func (c *Client) GetSite(siteID string) (*Site, error) {
 	}
 
 	// TODO: Generalise pagination handling and use elsewhere
-	pageNumber, totalPageCount, err := GetPaginationNumbers(siteListResponse.Pagination)
+	pageNumber, totalPageCount, _, err := GetPaginationNumbers(siteListResponse.Pagination)
 	if err != nil {
 		return nil, err
 	}
