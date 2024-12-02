@@ -18,6 +18,7 @@ type Group struct {
 	ID              string       `json:"id,omitempty"`
 	Name            string       `json:"name"`
 	MinimumSiteRole string       `json:"minimumSiteRole"`
+	OnDemandAccess  *bool        `json:"externalUserEnabled,omitempty"`
 	Import          *GroupImport `json:"import,omitempty"`
 }
 
@@ -143,11 +144,11 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 	return nil, fmt.Errorf("Did not find group ID %s", groupID)
 }
 
-func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
-
+func (c *Client) CreateGroup(name, minimumSiteRole string, onDemandAccess *bool) (*Group, error) {
 	newGroup := Group{
 		Name:            name,
 		MinimumSiteRole: minimumSiteRole,
+		OnDemandAccess:  onDemandAccess,
 	}
 	groupRequest := GroupRequest{
 		Group: newGroup,
@@ -177,39 +178,41 @@ func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
 	return &groupResponse.Group, nil
 }
 
-func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string) (*Group, error) {
 
+func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string, onDemandAccess *bool) (*Group, error) {
 	group := Group{
-		Name:            name,
-		MinimumSiteRole: minimumSiteRole,
+			Name:            name,
+			MinimumSiteRole: minimumSiteRole,
+			OnDemandAccess:  onDemandAccess, // Include on_demand_access in the payload
 	}
 	groupRequest := GroupRequest{
-		Group: group,
+			Group: group,
 	}
 
 	updateGroupJson, err := json.Marshal(groupRequest)
 	if err != nil {
-		return nil, err
+			return nil, err
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/groups/%s", c.ApiUrl, groupID), strings.NewReader(string(updateGroupJson)))
 	if err != nil {
-		return nil, err
+			return nil, err
 	}
 
 	body, err := c.doRequest(req)
 	if err != nil {
-		return nil, err
+			return nil, err
 	}
 
 	groupResponse := GroupResponse{}
 	err = json.Unmarshal(body, &groupResponse)
 	if err != nil {
-		return nil, err
+			return nil, err
 	}
 
 	return &groupResponse.Group, nil
 }
+
 
 func (c *Client) DeleteGroup(groupID string) error {
 

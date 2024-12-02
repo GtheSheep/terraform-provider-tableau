@@ -32,6 +32,7 @@ type groupResourceModel struct {
 	ID              types.String `tfsdk:"id"`
 	Name            types.String `tfsdk:"name"`
 	MinimumSiteRole types.String `tfsdk:"minimum_site_role"`
+	OnDemandAccess  types.Bool   `tfsdk:"on_demand_access"`
 	LastUpdated     types.String `tfsdk:"last_updated"`
 }
 
@@ -70,12 +71,17 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					}...),
 				},
 			},
+			"on_demand_access": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Enable on-demand access for embedded Tableau content.",
+			},
 			"last_updated": schema.StringAttribute{
 				Computed: true,
 			},
 		},
 	}
 }
+
 
 func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan groupResourceModel
@@ -85,12 +91,19 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+	// Handle OnDemandAccess correctly
+	var onDemandAccess *bool
+	if !plan.OnDemandAccess.IsNull() {
+		value := plan.OnDemandAccess.ValueBool()
+		onDemandAccess = &value
 	}
 
-	createdGroup, err := r.client.CreateGroup(group.Name, group.MinimumSiteRole)
+	// Create the group with OnDemandAccess
+	createdGroup, err := r.client.CreateGroup(
+		plan.Name.ValueString(),
+		plan.MinimumSiteRole.ValueString(),
+		onDemandAccess,
+	)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating group",
@@ -124,6 +137,12 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
+	
+	if group.OnDemandAccess != nil {
+    state.OnDemandAccess = types.BoolValue(*group.OnDemandAccess)
+	} else {
+    state.OnDemandAccess = types.BoolNull()
+	}
 
 	if group.Import != nil && group.Import.MinimumSiteRole != nil {
 		state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
@@ -143,42 +162,48 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		return
+			return
 	}
 
-	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+	// Handle OnDemandAccess correctly
+	var onDemandAccess *bool
+	if !plan.OnDemandAccess.IsNull() {
+			value := plan.OnDemandAccess.ValueBool()
+			onDemandAccess = &value
 	}
 
-	_, err := r.client.UpdateGroup(plan.ID.ValueString(), group.Name, group.MinimumSiteRole)
+	// Update the group with all attributes
+	updatedGroup, err := r.client.UpdateGroup(
+			plan.ID.ValueString(),
+			plan.Name.ValueString(),
+			plan.MinimumSiteRole.ValueString(),
+			onDemandAccess, // Pass on_demand_access explicitly
+	)
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Updating Tableau Group",
-			"Could not update group, unexpected error: "+err.Error(),
-		)
-		return
+			resp.Diagnostics.AddError(
+					"Error Updating Tableau Group",
+					"Could not update group, unexpected error: "+err.Error(),
+			)
+			return
 	}
 
-	updatedGroup, err := r.client.GetGroup(plan.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau Group",
-			"Could not read Tableau group ID "+plan.ID.ValueString()+": "+err.Error(),
-		)
-		return
-	}
-
+	// Update the state
 	plan.Name = types.StringValue(updatedGroup.Name)
-	plan.MinimumSiteRole = types.StringValue(*updatedGroup.Import.MinimumSiteRole)
+	plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
+	if updatedGroup.OnDemandAccess != nil {
+			plan.OnDemandAccess = types.BoolValue(*updatedGroup.OnDemandAccess)
+	} else {
+			plan.OnDemandAccess = types.BoolNull()
+	}
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		return
+			return
 	}
 }
+
 
 func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state groupResourceModel
