@@ -54,7 +54,7 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "Display name for group",
 			},
 			"minimum_site_role": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "Minimum site role for the group",
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{
@@ -91,17 +91,23 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	// Handle OnDemandAccess correctly
 	var onDemandAccess *bool
 	if !plan.OnDemandAccess.IsNull() {
 		value := plan.OnDemandAccess.ValueBool()
 		onDemandAccess = &value
 	}
 
-	// Create the group with OnDemandAccess
+	var minimumSiteRole *string
+	if !plan.MinimumSiteRole.IsNull() {
+		value := plan.MinimumSiteRole.ValueString()
+		if value != "" {
+			minimumSiteRole = &value
+		}
+	}
+
 	createdGroup, err := r.client.CreateGroup(
 		plan.Name.ValueString(),
-		plan.MinimumSiteRole.ValueString(),
+		minimumSiteRole,
 		onDemandAccess,
 	)
 	if err != nil {
@@ -117,10 +123,8 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
+
 
 func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state groupResourceModel
@@ -145,9 +149,9 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	if group.Import != nil && group.Import.MinimumSiteRole != nil {
-		state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
+    state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
 	} else {
-		state.MinimumSiteRole = types.StringNull()
+			state.MinimumSiteRole = types.StringNull()
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -165,19 +169,25 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 			return
 	}
 
-	// Handle OnDemandAccess correctly
 	var onDemandAccess *bool
 	if !plan.OnDemandAccess.IsNull() {
 			value := plan.OnDemandAccess.ValueBool()
 			onDemandAccess = &value
 	}
 
-	// Update the group with all attributes
+	var minimumSiteRole *string
+	if !plan.MinimumSiteRole.IsNull() {
+			value := plan.MinimumSiteRole.ValueString()
+			if value != "" {
+					minimumSiteRole = &value
+			}
+	}
+
 	updatedGroup, err := r.client.UpdateGroup(
 			plan.ID.ValueString(),
 			plan.Name.ValueString(),
-			plan.MinimumSiteRole.ValueString(),
-			onDemandAccess, // Pass on_demand_access explicitly
+			minimumSiteRole,
+			onDemandAccess,
 	)
 	if err != nil {
 			resp.Diagnostics.AddError(
@@ -187,9 +197,14 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 			return
 	}
 
-	// Update the state
 	plan.Name = types.StringValue(updatedGroup.Name)
-	plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
+
+	if updatedGroup.MinimumSiteRole != "" {
+			plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
+	} else {
+			plan.MinimumSiteRole = types.StringNull()
+	}
+
 	if updatedGroup.OnDemandAccess != nil {
 			plan.OnDemandAccess = types.BoolValue(*updatedGroup.OnDemandAccess)
 	} else {
