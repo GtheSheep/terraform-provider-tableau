@@ -159,7 +159,7 @@ func (c *Client) CreateGroup(name string, minimumSiteRole *string, onDemandAcces
 
 	groupRequest := GroupRequest{Group: group}
 	groupJSON, err := json.Marshal(groupRequest)
-	fmt.Printf("Payload: %s\n", string(groupJSON))
+
 	if err != nil {
 			return nil, err
 	}
