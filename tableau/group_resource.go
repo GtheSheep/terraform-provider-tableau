@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -73,6 +74,8 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			},
 			"on_demand_access": schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 				Description: "Enable on-demand access for embedded Tableau content.",
 			},
 			"last_updated": schema.StringAttribute{
@@ -81,7 +84,6 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 		},
 	}
 }
-
 
 func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan groupResourceModel
@@ -125,7 +127,6 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	resp.Diagnostics.Append(diags...)
 }
 
-
 func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state groupResourceModel
 	diags := req.State.Get(ctx, &state)
@@ -141,17 +142,17 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
-	
+
 	if group.OnDemandAccess != nil {
-    state.OnDemandAccess = types.BoolValue(*group.OnDemandAccess)
+		state.OnDemandAccess = types.BoolValue(*group.OnDemandAccess)
 	} else {
-    state.OnDemandAccess = types.BoolNull()
+		state.OnDemandAccess = types.BoolNull()
 	}
 
 	if group.Import != nil && group.Import.MinimumSiteRole != nil {
-    state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
+		state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
 	} else {
-			state.MinimumSiteRole = types.StringNull()
+		state.MinimumSiteRole = types.StringNull()
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -166,59 +167,58 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 
 	var onDemandAccess *bool
 	if !plan.OnDemandAccess.IsNull() {
-			value := plan.OnDemandAccess.ValueBool()
-			onDemandAccess = &value
+		value := plan.OnDemandAccess.ValueBool()
+		onDemandAccess = &value
 	}
 
 	var minimumSiteRole *string
 	if !plan.MinimumSiteRole.IsNull() {
-			value := plan.MinimumSiteRole.ValueString()
-			if value != "" {
-					minimumSiteRole = &value
-			}
+		value := plan.MinimumSiteRole.ValueString()
+		if value != "" {
+			minimumSiteRole = &value
+		}
 	}
 
 	updatedGroup, err := r.client.UpdateGroup(
-			plan.ID.ValueString(),
-			plan.Name.ValueString(),
-			minimumSiteRole,
-			onDemandAccess,
+		plan.ID.ValueString(),
+		plan.Name.ValueString(),
+		minimumSiteRole,
+		onDemandAccess,
 	)
 	if err != nil {
-			resp.Diagnostics.AddError(
-					"Error Updating Tableau Group",
-					"Could not update group, unexpected error: "+err.Error(),
-			)
-			return
+		resp.Diagnostics.AddError(
+			"Error Updating Tableau Group",
+			"Could not update group, unexpected error: "+err.Error(),
+		)
+		return
 	}
 
 	plan.Name = types.StringValue(updatedGroup.Name)
 
 	if updatedGroup.MinimumSiteRole != "" {
-			plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
+		plan.MinimumSiteRole = types.StringValue(updatedGroup.MinimumSiteRole)
 	} else {
-			plan.MinimumSiteRole = types.StringNull()
+		plan.MinimumSiteRole = types.StringNull()
 	}
 
 	if updatedGroup.OnDemandAccess != nil {
-			plan.OnDemandAccess = types.BoolValue(*updatedGroup.OnDemandAccess)
+		plan.OnDemandAccess = types.BoolValue(*updatedGroup.OnDemandAccess)
 	} else {
-			plan.OnDemandAccess = types.BoolNull()
+		plan.OnDemandAccess = types.BoolNull()
 	}
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-			return
+		return
 	}
 }
-
 
 func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state groupResourceModel

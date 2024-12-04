@@ -146,38 +146,38 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 
 func (c *Client) CreateGroup(name string, minimumSiteRole *string, onDemandAccess *bool) (*Group, error) {
 	group := Group{
-			Name: name,
+		Name: name,
 	}
 
 	if minimumSiteRole != nil && *minimumSiteRole != "" {
-			group.MinimumSiteRole = *minimumSiteRole
+		group.MinimumSiteRole = *minimumSiteRole
 	}
 
 	if onDemandAccess != nil {
-			group.OnDemandAccess = onDemandAccess
+		group.OnDemandAccess = onDemandAccess
 	}
 
 	groupRequest := GroupRequest{Group: group}
 	groupJSON, err := json.Marshal(groupRequest)
 
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/groups", c.ApiUrl), strings.NewReader(string(groupJSON)))
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	body, err := c.doRequest(req)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	groupResponse := GroupResponse{}
 	err = json.Unmarshal(body, &groupResponse)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	return &groupResponse.Group, nil
@@ -185,45 +185,44 @@ func (c *Client) CreateGroup(name string, minimumSiteRole *string, onDemandAcces
 
 func (c *Client) UpdateGroup(groupID, name string, minimumSiteRole *string, onDemandAccess *bool) (*Group, error) {
 	group := Group{
-			Name: name,
+		Name: name,
 	}
 
 	if minimumSiteRole != nil && *minimumSiteRole != "" {
-			group.MinimumSiteRole = *minimumSiteRole
+		group.MinimumSiteRole = *minimumSiteRole
 	}
 
 	if onDemandAccess != nil {
-			group.OnDemandAccess = onDemandAccess
+		group.OnDemandAccess = onDemandAccess
 	}
 
 	groupRequest := GroupRequest{
-			Group: group,
+		Group: group,
 	}
 
 	updateGroupJson, err := json.Marshal(groupRequest)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/groups/%s", c.ApiUrl, groupID), strings.NewReader(string(updateGroupJson)))
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	body, err := c.doRequest(req)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	groupResponse := GroupResponse{}
 	err = json.Unmarshal(body, &groupResponse)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	return &groupResponse.Group, nil
 }
-
 
 func (c *Client) DeleteGroup(groupID string) error {
 
