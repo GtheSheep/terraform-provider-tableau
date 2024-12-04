@@ -30,7 +30,7 @@ resource "tableau_group" "example" {
 ### Optional
 
 - `minimum_site_role` (String) Minimum site role for the group
-- `on_demand_access` (Boolean) Enable on-demand access for embedded Tableau content.
+- `on_demand_access` (Boolean) Enable on-demand access for embedded Tableau content (starting from API version 3.21).
 
 ### Read-Only
 
