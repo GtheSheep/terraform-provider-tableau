@@ -159,10 +159,6 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	// Update the state with the current resource details
 	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 	if group.OnDemandAccess != nil {
 		state.OnDemandAccess = types.BoolValue(*group.OnDemandAccess)
 	} else {
