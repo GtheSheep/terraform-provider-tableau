@@ -3,12 +3,8 @@ package main
 import (
 	"context"
 
-<<<<<<< Updated upstream
 	"github.com/gthesheep/terraform-provider-tableau/tableau"
-=======
->>>>>>> Stashed changes
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"gitlab.com/tailormed/devops/terraform-provider-tableau/tableau"
 )
 
 // Provider documentation generation.
