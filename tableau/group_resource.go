@@ -2,6 +2,7 @@ package tableau
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -137,18 +138,36 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	group, err := r.client.GetGroup(state.ID.ValueString())
 	if err != nil {
-		resp.State.RemoveResource(ctx)
+		// Handle the case where the resource does not exist
+		if strings.Contains(err.Error(), "Did not find group") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		resp.Diagnostics.AddError(
+			"Error Reading Tableau Group",
+			"Could not read group: "+err.Error(),
+		)
+		return
 	}
 
+	if group == nil {
+		// If the group doesn't exist, remove it from the state
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	// Update the state with the current resource details
 	state.ID = types.StringValue(group.ID)
 	state.Name = types.StringValue(group.Name)
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 	if group.OnDemandAccess != nil {
 		state.OnDemandAccess = types.BoolValue(*group.OnDemandAccess)
 	} else {
 		state.OnDemandAccess = types.BoolNull()
 	}
-
 	if group.Import != nil && group.Import.MinimumSiteRole != nil {
 		state.MinimumSiteRole = types.StringValue(*group.Import.MinimumSiteRole)
 	} else {
@@ -157,9 +176,6 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
