@@ -17,7 +17,8 @@ type GroupImport struct {
 type Group struct {
 	ID              string       `json:"id,omitempty"`
 	Name            string       `json:"name"`
-	MinimumSiteRole string       `json:"minimumSiteRole"`
+	MinimumSiteRole string       `json:"minimumSiteRole,omitempty"`
+	OnDemandAccess  *bool        `json:"externalUserEnabled,omitempty"`
 	Import          *GroupImport `json:"import,omitempty"`
 }
 
@@ -132,7 +133,7 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		// check if we found the group in this page
+
 		for i, group := range groupListResponse.GroupsResponse.Groups {
 			if group.ID == groupID {
 				return &groupListResponse.GroupsResponse.Groups[i], nil
@@ -143,22 +144,27 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 	return nil, fmt.Errorf("Did not find group ID %s", groupID)
 }
 
-func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
-
-	newGroup := Group{
-		Name:            name,
-		MinimumSiteRole: minimumSiteRole,
-	}
-	groupRequest := GroupRequest{
-		Group: newGroup,
+func (c *Client) CreateGroup(name string, minimumSiteRole *string, onDemandAccess *bool) (*Group, error) {
+	group := Group{
+		Name: name,
 	}
 
-	newGroupJson, err := json.Marshal(groupRequest)
+	if minimumSiteRole != nil && *minimumSiteRole != "" {
+		group.MinimumSiteRole = *minimumSiteRole
+	}
+
+	if onDemandAccess != nil {
+		group.OnDemandAccess = onDemandAccess
+	}
+
+	groupRequest := GroupRequest{Group: group}
+	groupJSON, err := json.Marshal(groupRequest)
+
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/groups", c.ApiUrl), strings.NewReader(string(newGroupJson)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/groups", c.ApiUrl), strings.NewReader(string(groupJSON)))
 	if err != nil {
 		return nil, err
 	}
@@ -177,12 +183,19 @@ func (c *Client) CreateGroup(name, minimumSiteRole string) (*Group, error) {
 	return &groupResponse.Group, nil
 }
 
-func (c *Client) UpdateGroup(groupID, name, minimumSiteRole string) (*Group, error) {
-
+func (c *Client) UpdateGroup(groupID, name string, minimumSiteRole *string, onDemandAccess *bool) (*Group, error) {
 	group := Group{
-		Name:            name,
-		MinimumSiteRole: minimumSiteRole,
+		Name: name,
 	}
+
+	if minimumSiteRole != nil && *minimumSiteRole != "" {
+		group.MinimumSiteRole = *minimumSiteRole
+	}
+
+	if onDemandAccess != nil {
+		group.OnDemandAccess = onDemandAccess
+	}
+
 	groupRequest := GroupRequest{
 		Group: group,
 	}
