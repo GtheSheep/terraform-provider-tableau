@@ -74,9 +74,7 @@ func (c *Client) GetDatasources() ([]Datasource, error) {
 	}
 
 	allDatasources := make([]Datasource, 0, totalAvailable)
-	for _, datasource := range datasourceListResponse.DatasourcesResponse.Datasources {
-		allDatasources = append(allDatasources, datasource)
-	}
+	allDatasources = append(allDatasources, datasourceListResponse.DatasourcesResponse.Datasources...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
@@ -93,9 +91,7 @@ func (c *Client) GetDatasources() ([]Datasource, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, datasource := range datasourceListResponse.DatasourcesResponse.Datasources {
-			allDatasources = append(allDatasources, datasource)
-		}
+		allDatasources = append(allDatasources, datasourceListResponse.DatasourcesResponse.Datasources...)
 	}
 
 	return allDatasources, nil

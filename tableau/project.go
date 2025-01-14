@@ -58,9 +58,7 @@ func (c *Client) GetProjects() ([]Project, error) {
 	}
 
 	allProjects := make([]Project, 0, totalAvailable)
-	for _, project := range projectListResponse.ProjectsResponse.Projects {
-		allProjects = append(allProjects, project)
-	}
+	allProjects = append(allProjects, projectListResponse.ProjectsResponse.Projects...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
@@ -77,9 +75,7 @@ func (c *Client) GetProjects() ([]Project, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, project := range projectListResponse.ProjectsResponse.Projects {
-			allProjects = append(allProjects, project)
-		}
+		allProjects = append(allProjects, projectListResponse.ProjectsResponse.Projects...)
 	}
 
 	return allProjects, nil

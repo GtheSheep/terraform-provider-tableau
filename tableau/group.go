@@ -62,9 +62,7 @@ func (c *Client) GetGroups() ([]Group, error) {
 	}
 
 	allGroups := make([]Group, 0, totalAvailable)
-	for _, group := range groupListResponse.GroupsResponse.Groups {
-		allGroups = append(allGroups, group)
-	}
+	allGroups = append(allGroups, groupListResponse.GroupsResponse.Groups...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
@@ -81,9 +79,7 @@ func (c *Client) GetGroups() ([]Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, group := range groupListResponse.GroupsResponse.Groups {
-			allGroups = append(allGroups, group)
-		}
+		allGroups = append(allGroups, groupListResponse.GroupsResponse.Groups...)
 	}
 
 	return allGroups, nil

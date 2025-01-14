@@ -58,9 +58,7 @@ func (c *Client) GetUsers() ([]User, error) {
 	}
 
 	allUsers := make([]User, 0, totalAvailable)
-	for _, user := range userListResponse.UsersResponse.Users {
-		allUsers = append(allUsers, user)
-	}
+	allUsers = append(allUsers, userListResponse.UsersResponse.Users...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
@@ -77,9 +75,7 @@ func (c *Client) GetUsers() ([]User, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, user := range userListResponse.UsersResponse.Users {
-			allUsers = append(allUsers, user)
-		}
+		allUsers = append(allUsers, userListResponse.UsersResponse.Users...)
 	}
 
 	return allUsers, nil
