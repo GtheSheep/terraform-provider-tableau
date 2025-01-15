@@ -75,6 +75,9 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		}
 
 		body, err := c.doRequest(req)
+		if err != nil {
+			return nil, err
+		}
 
 		// parse response body
 		ar := SignInResponse{}
