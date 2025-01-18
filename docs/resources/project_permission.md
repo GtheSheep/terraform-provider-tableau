@@ -41,8 +41,15 @@ resource "tableau_project_permission" "test_permission" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_project_permission` using the `projects`, project's id, `permissions`, entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
+```terraform
+import {
+  to = tableau_project_permission.example
+  id = "projects/projaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow"
+}
+```
 
+Using `terraform import`, import `tableau_project_permission` using the `projects`, project's id, `permissions`, entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
 ```shell
-terraform import tableau_project_permission.example "projects/<project_id>/permissions/<entity_type>/<entity_id>/<capability_name>/<capability_mode>"
+% terraform import tableau_project_permission.example projects/projaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow
 ```

@@ -42,8 +42,15 @@ resource "tableau_project" "test" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_project` using the `id` attribute. For example:
+```terraform
+import {
+  to = tableau_project.example
+  id = "projaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+}
+```
 
+Using `terraform import`, import `tableau_project` using the `id` attribute. For example:
 ```shell
-terraform import tableau_project.example "project_id"
+% terraform import tableau_project.example projaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 ```

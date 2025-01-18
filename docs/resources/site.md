@@ -37,8 +37,15 @@ resource "tableau_site" "test" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_site` using the `id` attribute. For example:
+```terraform
+import {
+  to = tableau_site.example
+  id = "abc"
+}
+```
 
+Using `terraform import`, import `tableau_site` using the `id` attribute. For example:
 ```shell
-terraform import tableau_site.example "site_id"
+% terraform import tableau_site.example abc
 ```

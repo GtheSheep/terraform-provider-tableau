@@ -41,8 +41,15 @@ resource "tableau_workbook_permission" "test_permission" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_workbook_permission` using the `workbooks`, workbook's id, `permissions`, entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
+```terraform
+import {
+  to = tableau_workbook_permission.example
+  id = "workbooks/wbookaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow"
+}
+```
 
+Using `terraform import`, import `tableau_workbook_permission` using the `workbooks`, workbook's id, `permissions`, entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
 ```shell
-terraform import tableau_workbook_permission.example "workbooks/<workbook_id>/permissions/<entity_type>/<entity_id>/<capability_name>/<capability_mode>"
+% terraform import tableau_workbook_permission.example workbooks/wbookaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow
 ```

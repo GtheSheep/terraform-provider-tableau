@@ -41,8 +41,15 @@ resource "tableau_view_permission" "test_permission" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_view_permission` using the `views`, view's id, `permissions`, entity type (`users` or `groups`), entity's id,  capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
+```terraform
+import {
+  to = tableau_view_permission.example
+  id = "views/viewaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow"
+}
+```
 
+Using `terraform import`, import `tableau_view_permission` using the `views`, view's id, `permissions`, entity type (`users` or `groups`), entity's id,  capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
 ```shell
-terraform import tableau_view_permission.example "views/<view_id>/permissions/<entity_type>/<entity_id>/<capability_name>/<capability_mode>"
+% terraform import tableau_view_permission.example views/viewaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Allow
 ```

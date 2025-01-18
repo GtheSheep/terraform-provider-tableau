@@ -35,8 +35,15 @@ resource "tableau_group" "example" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_group` using the `id` attribute. For example:
+```terraform
+import {
+  to = tableau_group.example
+  id = "groupaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+}
+```
 
+Using `terraform import`, import `tableau_group` using the `id` attribute. For example:
 ```shell
-terraform import tableau_group.example "group_id"
+% terraform import tableau_group.example groupaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 ```

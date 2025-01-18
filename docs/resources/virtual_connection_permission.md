@@ -41,8 +41,15 @@ resource "tableau_virtual_connection_permission" "test_permission" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_virtual_connection_permission` using the `virtualconnections`, virtualconnection's id, `permissions`,  entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
+```terraform
+import {
+  to = tableau_virtual_connection_permission.example
+  id = "virtualconnections/vconnaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Deny"
+}
+```
 
+Using `terraform import`, import `tableau_virtual_connection_permission` using the `virtualconnections`, virtualconnection's id, `permissions`,  entity type (`users` or `groups`), entity's id, capability name and capability mode (`Allow` or `Deny`) separated by slash (`/`). For example:
 ```shell
-terraform import tableau_virtual_connection_permission.example "virtualconnections/<virtualconnection_id>/permissions/<entity_type>/<entity_id>/<capability_name>/<capability_mode>"
+% terraform import tableau_virtual_connection_permission.example virtualconnections/vconnaaa-bbbb-cccc-dddd-eeeeeeeeeeee/permissions/users/usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee/Write/Deny
 ```

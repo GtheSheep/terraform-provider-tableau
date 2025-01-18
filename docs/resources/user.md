@@ -40,8 +40,17 @@ resource "tableau_user" "example" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `tableau_user` using the `id` attribute. For example:
+
+```terraform
+import {
+  to = tableau_user.example
+  id = "usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+}
+```
+
+Using `terraform import`, import `tableau_user` using the `id` attribute. For example:
 
 ```shell
-terraform import tableau_user.example "user_id"
+% terraform import tableau_user.example usersaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 ```

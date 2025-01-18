@@ -34,8 +34,15 @@ resource "tableau_group_user" "example" {
 
 ## Import
 
-Import is supported using the following syntax:
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import `group_user` using the group's and user's `id` separated by a colon (`:`). For example:
+```terraform
+import {
+  to = group_user.example
+  id = "groupida-bbbb-cccc-dddd-eeeeeeeeeeee:userida-bbbb-cccc-dddd-eeeeeeeeeeee"
+}
+```
 
+Using `terraform import`, import `group_user` using the group's and user's `id` separated by a colon (`:`). For example:
 ```shell
-terraform import group_user.example "group_id:user_id"
+% terraform import group_user.example groupida-bbbb-cccc-dddd-eeeeeeeeeeee:userida-bbbb-cccc-dddd-eeeeeeeeeeee
 ```
