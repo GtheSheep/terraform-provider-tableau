@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -61,6 +62,10 @@ func (p *tableauProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 				Optional:    true,
 				Description: "Site name from your Tableau URL - TABLEAU_SITE_NAME env var - for Tableau Server default sites leave as ''",
 			},
+			"is_tcm": schema.BoolAttribute{
+				Optional:    true,
+				Description: "Set to true if using this provider for Tableau Cloud Manager - TABLEAU_IS_TCM env var - default false",
+			},
 		},
 	}
 }
@@ -73,6 +78,7 @@ type tableauProviderModel struct {
 	PersonalAccessTokenName   types.String `tfsdk:"personal_access_token_name"`
 	PersonalAccessTokenSecret types.String `tfsdk:"personal_access_token_secret"`
 	Site                      types.String `tfsdk:"site"`
+	IsTCM                     types.Bool   `tfsdk:"is_tcm"`
 }
 
 func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -135,10 +141,18 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
+	if config.IsTCM.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("is_tcm"),
+			"Unknown TCM setting",
+			"Tableau TCM setting must either be true or false",
+		)
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	
 	serverURL := os.Getenv("TABLEAU_SERVER_URL")
 	serverVersion := os.Getenv("TABLEAU_SERVER_VERSION")
 	username := os.Getenv("TABLEAU_USERNAME")
@@ -146,6 +160,8 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 	personalAccessTokenName := os.Getenv("TABLEAU_PERSONAL_ACCESS_TOKEN_NAME")
 	personalAccessTokenSecret := os.Getenv("TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET")
 	site := os.Getenv("TABLEAU_SITE_NAME")
+	isTCM := false
+	isTCM = os.Getenv("TABLEAU_IS_TCM")
 
 	if !config.ServerURL.IsNull() {
 		serverURL = config.ServerURL.ValueString()
@@ -173,6 +189,12 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if !config.Site.IsNull() {
 		site = config.Site.ValueString()
+	}
+
+	if !config.IsTCM.IsNull() {
+		if !config.IsTCM.ValueBool() {
+			isTCM = config.IsTCM.ValueBool()	
+		}
 	}
 
 	if serverURL == "" {
@@ -229,6 +251,7 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 		&personalAccessTokenSecret,
 		&site,
 		&serverVersion,
+		isTCM,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(

@@ -13,6 +13,7 @@ type Client struct {
 	ApiUrl     string
 	HTTPClient *http.Client
 	AuthToken  string
+	IsTCM      bool
 }
 
 type SiteDetails struct {
@@ -35,15 +36,16 @@ type SignInRequest struct {
 type SignInResponseData struct {
 	SiteDetails               SiteDetails `json:"site"`
 	User                      User        `json:"user"`
-	Token                     string      `json:"token"`
+	Token                     *string     `json:"token"`
 	EstimatedTimeToExpiration string      `json:"estimatedTimeToExpiration"`
+	SessionToken              *string     `json:"sessionToken"`
 }
 
 type SignInResponse struct {
 	SignInResponseData SignInResponseData `json:"credentials"`
 }
 
-func NewClient(server, username, password, personalAccessTokenName, personalAccessTokenSecret, site, serverVersion *string) (*Client, error) {
+func NewClient(server, username, password, personalAccessTokenName, personalAccessTokenSecret, site, serverVersion *string, isTCM bool) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
 	}
@@ -51,6 +53,9 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 	if (server != nil) && (username != nil) && (site != nil) && (serverVersion != nil) {
 		baseUrl := fmt.Sprintf("%s/api/%s", *server, *serverVersion)
 		url := fmt.Sprintf("%s/auth/signin", baseUrl)
+		if isTCM {
+			url = fmt.Sprintf("%s/pat/signin", baseUrl)
+		}
 
 		siteStruct := SiteDetails{ContentUrl: *site}
 		credentials := Credentials{
@@ -84,7 +89,12 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		}
 
 		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.SiteDetails.ID)
-		c.AuthToken = ar.SignInResponseData.Token
+		if isTCM {
+			c.AuthToken = *ar.SignInResponseData.SessionToken
+		} else {
+			c.AuthToken = *ar.SignInResponseData.Token
+		}
+		c.IsTCM = isTCM
 	}
 
 	return &c, nil
@@ -93,7 +103,11 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Tableau-Auth", c.AuthToken)
+	if c.IsTCM {
+		req.Header.Add("x-tableau-session-token", c.AuthToken)
+	} else {
+		req.Header.Add("X-Tableau-Auth", c.AuthToken)
+	}
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
