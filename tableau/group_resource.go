@@ -53,7 +53,7 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "Display name for group",
 			},
 			"minimum_site_role": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "Minimum site role for the group",
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{
@@ -86,8 +86,10 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+		Name: string(plan.Name.ValueString()),
+	}
+	if plan.MinimumSiteRole.ValueString() != "" {
+		group.MinimumSiteRole = string(plan.MinimumSiteRole.ValueString())
 	}
 
 	createdGroup, err := r.client.CreateGroup(group.Name, group.MinimumSiteRole)

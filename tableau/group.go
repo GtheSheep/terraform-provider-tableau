@@ -17,7 +17,7 @@ type GroupImport struct {
 type Group struct {
 	ID              string       `json:"id,omitempty"`
 	Name            string       `json:"name"`
-	MinimumSiteRole string       `json:"minimumSiteRole"`
+	MinimumSiteRole string       `json:"minimumSiteRole,omitempty"`
 	Import          *GroupImport `json:"import,omitempty"`
 }
 
