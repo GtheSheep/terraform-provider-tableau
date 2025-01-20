@@ -25,8 +25,11 @@ resource "tableau_group" "example" {
 
 ### Required
 
-- `minimum_site_role` (String) Minimum site role for the group
 - `name` (String) Display name for group
+
+### Optional
+
+- `minimum_site_role` (String) Minimum site role for the group
 
 ### Read-Only
 
