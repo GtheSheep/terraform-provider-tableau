@@ -154,13 +154,16 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 	site := os.Getenv("TABLEAU_SITE_NAME")
 	isTCM := false
 	isTCMString := os.Getenv("TABLEAU_IS_TCM")
-	isTCM, err := strconv.ParseBool(isTCMString)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to parse is_tcm environment variable to boolean",
-			"Tableau Client Error: "+err.Error(),
-		)
-		return
+	if isTCMString != "" {
+		isTCMBool, err := strconv.ParseBool(isTCMString)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to parse is_tcm environment variable to boolean",
+				"Tableau Client Error: "+err.Error(),
+			)
+			return
+		}
+		isTCM = isTCMBool
 	}
 
 	if !config.ServerURL.IsNull() {
