@@ -38,6 +38,7 @@ type SignInResponseData struct {
 	User                      User        `json:"user"`
 	Token                     *string     `json:"token"`
 	EstimatedTimeToExpiration string      `json:"estimatedTimeToExpiration"`
+	TenantID                  *string     `json:"tenantId"`
 	SessionToken              *string     `json:"sessionToken"`
 }
 
@@ -54,7 +55,7 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 		baseUrl := fmt.Sprintf("%s/api/%s", *server, *serverVersion)
 		url := fmt.Sprintf("%s/auth/signin", baseUrl)
 		if isTCM {
-			url = fmt.Sprintf("%s/pat/signin", baseUrl)
+			url = fmt.Sprintf("%s/api/v1/pat/login", *server)
 		}
 
 		siteStruct := SiteDetails{ContentUrl: *site}
@@ -88,11 +89,12 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 			return nil, err
 		}
 
-		c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.SiteDetails.ID)
 		if isTCM {
 			c.AuthToken = *ar.SignInResponseData.SessionToken
+			c.ApiUrl = fmt.Sprintf("%s/api/v1/tenants/%s", *server, *ar.SignInResponseData.TenantID)
 		} else {
 			c.AuthToken = *ar.SignInResponseData.Token
+			c.ApiUrl = fmt.Sprintf("%s/sites/%s", baseUrl, *ar.SignInResponseData.SiteDetails.ID)
 		}
 		c.IsTCM = isTCM
 	}

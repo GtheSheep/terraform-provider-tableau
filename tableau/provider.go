@@ -3,13 +3,13 @@ package tableau
 import (
 	"context"
 	"os"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -141,18 +141,10 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
-	if config.IsTCM.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("is_tcm"),
-			"Unknown TCM setting",
-			"Tableau TCM setting must either be true or false",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	serverURL := os.Getenv("TABLEAU_SERVER_URL")
 	serverVersion := os.Getenv("TABLEAU_SERVER_VERSION")
 	username := os.Getenv("TABLEAU_USERNAME")
@@ -161,7 +153,15 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 	personalAccessTokenSecret := os.Getenv("TABLEAU_PERSONAL_ACCESS_TOKEN_SECRET")
 	site := os.Getenv("TABLEAU_SITE_NAME")
 	isTCM := false
-	isTCM = os.Getenv("TABLEAU_IS_TCM")
+	isTCMString := os.Getenv("TABLEAU_IS_TCM")
+	isTCM, err := strconv.ParseBool(isTCMString)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to parse is_tcm environment variable to boolean",
+			"Tableau Client Error: "+err.Error(),
+		)
+		return
+	}
 
 	if !config.ServerURL.IsNull() {
 		serverURL = config.ServerURL.ValueString()
@@ -193,7 +193,7 @@ func (p *tableauProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if !config.IsTCM.IsNull() {
 		if !config.IsTCM.ValueBool() {
-			isTCM = config.IsTCM.ValueBool()	
+			isTCM = config.IsTCM.ValueBool()
 		}
 	}
 
