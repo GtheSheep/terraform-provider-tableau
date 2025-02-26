@@ -42,7 +42,7 @@ func (d *virtualConnectionConnectionsDataSource) Schema(_ context.Context, _ dat
 		Description: "Retrieve virtual connection's connections details",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:    true,
+				Required:    true,
 				Description: "ID of the virtual connections",
 			},
 			"connections": schema.ListNestedAttribute{
