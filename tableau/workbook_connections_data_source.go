@@ -49,7 +49,7 @@ func (d *workbookConnectionsDataSource) Schema(_ context.Context, _ datasource.S
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: "ID of the virtual connections",
+				Description: "ID of the workbook",
 			},
 			"connections": schema.ListNestedAttribute{
 				Description: "List database connections of virtual connection and their attributes",
