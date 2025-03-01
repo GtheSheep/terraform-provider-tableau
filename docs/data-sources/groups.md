@@ -13,7 +13,7 @@ Retrieve groups details
 ## Example Usage
 
 ```terraform
-data "tableau_datasources" "example" {
+data "tableau_groups" "example" {
 }
 ```
 
