@@ -137,10 +137,12 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 	return &userResponse.User, nil
 }
 
-func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, error) {
+func (c *Client) UpdateUser(userID, email, name, fullName, siteRole, authSetting string) (*User, error) {
 
 	newUser := User{
+		Email:       email,
 		Name:        name,
+		FullName:    fullName,
 		SiteRole:    siteRole,
 		AuthSetting: authSetting,
 	}
