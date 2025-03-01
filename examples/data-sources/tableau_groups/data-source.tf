@@ -1,2 +1,2 @@
-data "tableau_datasources" "example" {
+data "tableau_groups" "example" {
 }
