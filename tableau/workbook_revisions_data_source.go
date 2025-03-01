@@ -40,7 +40,7 @@ func (d *workbookRevisionsDataSource) Metadata(_ context.Context, req datasource
 
 func (d *workbookRevisionsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Retrieve virtual connection revisions details",
+		Description: "Retrieve workbook revisions details",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,
