@@ -44,7 +44,7 @@ func (d *workbookRevisionsDataSource) Schema(_ context.Context, _ datasource.Sch
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: "ID of the virtual connections",
+				Description: "ID of the workbook",
 			},
 			"revisions": schema.ListNestedAttribute{
 				Description: "List database connections of virtual connection and their attributes",
