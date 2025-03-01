@@ -47,7 +47,7 @@ func (d *workbookRevisionsDataSource) Schema(_ context.Context, _ datasource.Sch
 				Description: "ID of the workbook",
 			},
 			"revisions": schema.ListNestedAttribute{
-				Description: "List database connections of virtual connection and their attributes",
+				Description: "List workbook revisions and their attributes",
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
