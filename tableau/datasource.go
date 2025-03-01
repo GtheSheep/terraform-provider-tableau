@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type Tag struct {
@@ -78,7 +77,7 @@ func (c *Client) GetDatasources() ([]Datasource, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +126,7 @@ func (c *Client) GetDatasource(datasourceID, name string) (*Datasource, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -61,7 +60,7 @@ func (c *Client) GetSite(siteID string) (*Site, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/sites?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/sites?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}

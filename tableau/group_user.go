@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -51,7 +50,7 @@ func (c *Client) GetGroupUser(groupID, userID string) (*User, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups/%s/users?pageNumber=%s", c.ApiUrl, groupID, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups/%s/users?pageNumber=%d", c.ApiUrl, groupID, page), nil)
 		if err != nil {
 			return nil, err
 		}
