@@ -124,7 +124,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		)
 		return
 	}
-	_, err = r.client.UpdateUser(createdUser.ID, user.Name, user.SiteRole, user.AuthSetting)
+	_, err = r.client.UpdateUser(createdUser.ID, user.Email, user.Name, user.FullName, user.SiteRole, user.AuthSetting)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating user during create",
@@ -182,11 +182,12 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	user := User{
 		Email:       string(plan.Email.ValueString()),
 		Name:        string(plan.Name.ValueString()),
+		FullName:    string(plan.FullName.ValueString()),
 		SiteRole:    string(plan.SiteRole.ValueString()),
 		AuthSetting: string(plan.AuthSetting.ValueString()),
 	}
 
-	_, err := r.client.UpdateUser(plan.ID.ValueString(), user.Name, user.SiteRole, user.AuthSetting)
+	_, err := r.client.UpdateUser(plan.ID.ValueString(), user.Email, user.Name, user.FullName, user.SiteRole, user.AuthSetting)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Tableau User",
@@ -204,7 +205,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	plan.Email = types.StringValue(updatedUser.Email)
 	plan.Name = types.StringValue(updatedUser.Name)
+	plan.FullName = types.StringValue(updatedUser.FullName)
 	plan.SiteRole = types.StringValue(updatedUser.SiteRole)
 	plan.AuthSetting = types.StringValue(updatedUser.AuthSetting)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
