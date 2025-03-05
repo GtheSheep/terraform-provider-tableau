@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type DownloadVirtualConnection struct {
+type VirtualConnection struct {
 	ID      string
 	Project struct {
 		ID string `json:"id,omitempty"`
@@ -18,7 +18,7 @@ type DownloadVirtualConnection struct {
 	Name    string `json:"name,omitempty"`
 }
 
-type VirtualConnection struct {
+type ListedVirtualConnection struct {
 	ID          string `json:"id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	CreatedAt   string `json:"createdAt,omitempty"`
@@ -29,15 +29,15 @@ type VirtualConnection struct {
 }
 
 type VirtualConnectionsRequest struct {
-	VirtualConnection VirtualConnection `json:"virtualConnection"`
+	VirtualConnection ListedVirtualConnection `json:"virtualConnection"`
 }
 
 type VirtualConnectionResponse struct {
-	VirtualConnection DownloadVirtualConnection `json:"virtualConnection"`
+	VirtualConnection VirtualConnection `json:"virtualConnection"`
 }
 
 type VirtualConnectionsResponse struct {
-	VirtualConnections []VirtualConnection `json:"virtualConnection"`
+	VirtualConnections []ListedVirtualConnection `json:"virtualConnection"`
 }
 
 type VirtualConnectionsListResponse struct {
@@ -45,7 +45,7 @@ type VirtualConnectionsListResponse struct {
 	Pagination                 PaginationDetails          `json:"pagination"`
 }
 
-func (c *Client) GetVirtualConnection(ID string) (*DownloadVirtualConnection, error) {
+func (c *Client) GetVirtualConnection(ID string) (*VirtualConnection, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/virtualconnections/%s", c.ApiUrl, ID), nil)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (c *Client) GetVirtualConnection(ID string) (*DownloadVirtualConnection, er
 	return &virtualConnectionResponse.VirtualConnection, nil
 }
 
-func (c *Client) GetVirtualConnections() ([]VirtualConnection, error) {
+func (c *Client) GetVirtualConnections() ([]ListedVirtualConnection, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/virtualconnections", c.ApiUrl), nil)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (c *Client) GetVirtualConnections() ([]VirtualConnection, error) {
 		return nil, err
 	}
 
-	allVirtualConnections := make([]VirtualConnection, 0, totalAvailable)
+	allVirtualConnections := make([]ListedVirtualConnection, 0, totalAvailable)
 	allVirtualConnections = append(allVirtualConnections, virtualConnectionListResponse.VirtualConnectionsResponse.VirtualConnections...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
