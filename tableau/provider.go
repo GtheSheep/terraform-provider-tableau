@@ -259,9 +259,10 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 		DatasourcesDataSource,
 		VirtualConnectionsDataSource,
 		VirtualConnectionConnectionsDataSource,
+		VirtualConnectionRevisionDataSource,
 		VirtualConnectionRevisionsDataSource,
 		WorkbookConnectionsDataSource,
-    WorkbooksDataSource,
+		WorkbooksDataSource,
 		WorkbookRevisionsDataSource,
 	}
 }
