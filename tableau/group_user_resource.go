@@ -126,7 +126,6 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 func (r *groupUserResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	tflog.Info(ctx, "Group Users do not support updates")
-	return
 }
 
 func (r *groupUserResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
