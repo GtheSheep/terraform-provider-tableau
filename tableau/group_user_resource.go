@@ -70,7 +70,7 @@ func (r *groupUserResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	groupUser := User{
-		ID: string(plan.UserID.ValueString()),
+		ID: plan.UserID.ValueString(),
 	}
 
 	_, err := r.client.CreateGroupUser(plan.GroupID.ValueString(), groupUser.ID)

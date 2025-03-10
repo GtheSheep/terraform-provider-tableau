@@ -109,11 +109,11 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	user := User{
-		Email:       string(plan.Email.ValueString()),
-		Name:        string(plan.Name.ValueString()),
-		FullName:    string(plan.FullName.ValueString()),
-		SiteRole:    string(plan.SiteRole.ValueString()),
-		AuthSetting: string(plan.AuthSetting.ValueString()),
+		Email:       plan.Email.ValueString(),
+		Name:        plan.Name.ValueString(),
+		FullName:    plan.FullName.ValueString(),
+		SiteRole:    plan.SiteRole.ValueString(),
+		AuthSetting: plan.AuthSetting.ValueString(),
 	}
 
 	createdUser, err := r.client.CreateUser(user.Email, user.Name, user.FullName, user.SiteRole, user.AuthSetting)
@@ -180,11 +180,11 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	user := User{
-		Email:       string(plan.Email.ValueString()),
-		Name:        string(plan.Name.ValueString()),
-		FullName:    string(plan.FullName.ValueString()),
-		SiteRole:    string(plan.SiteRole.ValueString()),
-		AuthSetting: string(plan.AuthSetting.ValueString()),
+		Email:       plan.Email.ValueString(),
+		Name:        plan.Name.ValueString(),
+		FullName:    plan.FullName.ValueString(),
+		SiteRole:    plan.SiteRole.ValueString(),
+		AuthSetting: plan.AuthSetting.ValueString(),
 	}
 
 	_, err := r.client.UpdateUser(plan.ID.ValueString(), user.Email, user.Name, user.FullName, user.SiteRole, user.AuthSetting)

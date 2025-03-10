@@ -105,15 +105,11 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	project := Project{
-		Name:               string(plan.Name.ValueString()),
-		Description:        string(plan.Description.ValueString()),
-		ContentPermissions: string(plan.ContentPermissions.ValueString()),
-	}
-	if plan.ParentProjectID.ValueString() != "" {
-		project.ParentProjectID = string(plan.ParentProjectID.ValueString())
-	}
-	if plan.OwnerID.ValueString() != "" {
-		project.Owner.ID = string(plan.OwnerID.ValueString())
+		Name:               plan.Name.ValueString(),
+		Description:        plan.Description.ValueString(),
+		ContentPermissions: plan.ContentPermissions.ValueString(),
+		ParentProjectID:    plan.ParentProjectID.ValueString(),
+		Owner:              Owner{ID: plan.OwnerID.ValueString()},
 	}
 
 	createdProject, err := r.client.CreateProject(project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
@@ -175,17 +171,12 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	project := Project{
-		Name:               string(plan.Name.ValueString()),
-		Description:        string(plan.Description.ValueString()),
-		ContentPermissions: string(plan.ContentPermissions.ValueString()),
+		Name:               plan.Name.ValueString(),
+		Description:        plan.Description.ValueString(),
+		ContentPermissions: plan.ContentPermissions.ValueString(),
+		ParentProjectID:    plan.ParentProjectID.ValueString(),
+		Owner:              Owner{ID: plan.OwnerID.ValueString()},
 	}
-	if plan.ParentProjectID.ValueString() != "" {
-		project.ParentProjectID = string(plan.ParentProjectID.ValueString())
-	}
-	if plan.OwnerID.ValueString() != "" {
-		project.Owner.ID = string(plan.OwnerID.ValueString())
-	}
-
 	_, err := r.client.UpdateProject(plan.ID.ValueString(), project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(

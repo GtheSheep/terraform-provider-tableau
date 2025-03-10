@@ -86,10 +86,10 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	group := Group{
-		Name: string(plan.Name.ValueString()),
+		Name: plan.Name.ValueString(),
 	}
 	if plan.MinimumSiteRole.ValueString() != "" {
-		group.MinimumSiteRole = string(plan.MinimumSiteRole.ValueString())
+		group.MinimumSiteRole = plan.MinimumSiteRole.ValueString()
 	}
 
 	createdGroup, err := r.client.CreateGroup(group.Name, group.MinimumSiteRole)
@@ -149,8 +149,8 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+		Name:            plan.Name.ValueString(),
+		MinimumSiteRole: plan.MinimumSiteRole.ValueString(),
 	}
 
 	_, err := r.client.UpdateGroup(plan.ID.ValueString(), group.Name, group.MinimumSiteRole)

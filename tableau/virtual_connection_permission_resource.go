@@ -114,10 +114,10 @@ func (r *virtualConnectionPermissionResource) Create(ctx context.Context, req re
 		return
 	}
 
-	virtualConnectionID := string(plan.VirtualConnectionID.ValueString())
+	virtualConnectionID := plan.VirtualConnectionID.ValueString()
 	capability := Capability{
-		Name: string(plan.CapabilityName.ValueString()),
-		Mode: string(plan.CapabilityMode.ValueString()),
+		Name: plan.CapabilityName.ValueString(),
+		Mode: plan.CapabilityMode.ValueString(),
 	}
 	capabilities := Capabilities{
 		Capabilities: []Capability{capability},
@@ -127,11 +127,11 @@ func (r *virtualConnectionPermissionResource) Create(ctx context.Context, req re
 	}
 
 	entityType := "users"
-	entityID := string(plan.UserID.ValueString())
+	entityID := plan.UserID.ValueString()
 	if plan.UserID.ValueString() != "" {
 		granteeCapability.User = &User{ID: entityID}
 	} else {
-		entityID = string(plan.GroupID.ValueString())
+		entityID = plan.GroupID.ValueString()
 		entityType = "groups"
 		granteeCapability.Group = &Group{ID: entityID}
 	}

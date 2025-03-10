@@ -70,8 +70,8 @@ func (r *siteResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	site := Site{
-		Name:       string(plan.Name.ValueString()),
-		ContentURL: string(plan.ContentURL.ValueString()),
+		Name:       plan.Name.ValueString(),
+		ContentURL: plan.ContentURL.ValueString(),
 	}
 
 	createdSite, err := r.client.CreateSite(site.Name, site.ContentURL)
@@ -127,8 +127,8 @@ func (r *siteResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	site := Site{
-		Name:       string(plan.Name.ValueString()),
-		ContentURL: string(plan.ContentURL.ValueString()),
+		Name:       plan.Name.ValueString(),
+		ContentURL: plan.ContentURL.ValueString(),
 	}
 
 	_, err := r.client.UpdateSite(plan.ID.ValueString(), site.Name, site.ContentURL)
