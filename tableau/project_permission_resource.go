@@ -38,6 +38,26 @@ type projectPermissionResourceModel struct {
 	CapabilityMode types.String `tfsdk:"capability_mode"`
 }
 
+var projectPermissionCapabilities = []string{
+	"AddComment",
+	"ChangeHierarchy",
+	"ChangePermissions",
+	"CreateRefreshMetrics",
+	"Delete",
+	"ExportData",
+	"ExportImage",
+	"ExportXml",
+	"Filter",
+	"ProjectLeader",
+	"Read", // == View
+	"RunExplainData",
+	"ShareView",
+	"ViewComments",
+	"ViewUnderlyingData",
+	"WebAuthoring",
+	"Write", // == Publish
+}
+
 func (r *projectPermissionResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project_permission"
 }
@@ -74,13 +94,9 @@ func (r *projectPermissionResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"capability_name": schema.StringAttribute{
 				Required:    true,
-				Description: "The capability to assign permissions to, one of ProjectLeader/Read/Write",
+				Description: "The capability to assign permissions to: " + strings.Join(projectPermissionCapabilities, ","),
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{
-						"ProjectLeader",
-						"Read",
-						"Write",
-					}...),
+					stringvalidator.OneOf(projectPermissionCapabilities...),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
