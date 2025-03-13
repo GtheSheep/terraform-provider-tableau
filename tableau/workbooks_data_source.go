@@ -28,10 +28,13 @@ type workbooksNestedDataModel struct {
 	EncryptExtracts types.String `tfsdk:"encrypt_extracts"`
 	ShowTabs        types.String `tfsdk:"show_tabs"`
 	Size            types.String `tfsdk:"size"`
-	DefaultViewID   types.String `tfsdk:"default_view_id"`
 	LocationID      types.String `tfsdk:"location_id"`
+	LocationType    types.String `tfsdk:"location_type"`
+	LocationName    types.String `tfsdk:"location_name"`
 	OwnerID         types.String `tfsdk:"owner_id"`
+	OwnerName       types.String `tfsdk:"owner_name"`
 	ProjectID       types.String `tfsdk:"project_id"`
+	ProjectName     types.String `tfsdk:"project_name"`
 	ContentURL      types.String `tfsdk:"content_url"`
 	WebPageURL      types.String `tfsdk:"web_page_url"`
 	CreatedAt       types.String `tfsdk:"created_at"`
@@ -80,27 +83,39 @@ func (d *workbooksDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 						},
 						"show_tabs": schema.StringAttribute{
 							Computed:    true,
-							Description: "Whether or not this workbook show tabs",
+							Description: "Whether or not show views in tabs",
 						},
 						"size": schema.StringAttribute{
 							Computed:    true,
 							Description: "Workbook size in mega bytes",
 						},
-						"default_view_id": schema.StringAttribute{
-							Computed:    true,
-							Description: "ID of the workbook default view",
-						},
 						"location_id": schema.StringAttribute{
 							Computed:    true,
 							Description: "ID of the workbook location",
 						},
-						"project_id": schema.StringAttribute{
+						"location_name": schema.StringAttribute{
 							Computed:    true,
-							Description: "ID of the workbook project",
+							Description: "Name of the workbook location",
+						},
+						"location_type": schema.StringAttribute{
+							Computed:    true,
+							Description: "Type of the workbook location",
 						},
 						"owner_id": schema.StringAttribute{
 							Computed:    true,
 							Description: "ID of the workbook owner",
+						},
+						"owner_name": schema.StringAttribute{
+							Computed:    true,
+							Description: "Name of the workbook owner",
+						},
+						"project_id": schema.StringAttribute{
+							Computed:    true,
+							Description: "ID of the project",
+						},
+						"project_name": schema.StringAttribute{
+							Computed:    true,
+							Description: "Name of the project",
 						},
 						"created_at": schema.StringAttribute{
 							Computed:    true,
@@ -147,14 +162,17 @@ func (d *workbooksDataSource) Read(ctx context.Context, req datasource.ReadReque
 			EncryptExtracts: types.StringValue(workbook.EncryptExtracts),
 			ShowTabs:        types.StringValue(workbook.ShowTabs),
 			Size:            types.StringValue(workbook.Size),
-			DefaultViewID:   types.StringValue(workbook.DefaultViewID),
-			LocationID:      types.StringValue(workbook.Location.ID),
 			OwnerID:         types.StringValue(workbook.Owner.ID),
+			OwnerName:       types.StringValue(workbook.Owner.Name),
 			ProjectID:       types.StringValue(workbook.Project.ID),
+			ProjectName:     types.StringValue(workbook.Project.Name),
 			CreatedAt:       types.StringValue(workbook.CreatedAt),
 			UpdatedAt:       types.StringValue(workbook.UpdatedAt),
 			ContentURL:      types.StringValue(workbook.ContentURL),
 			WebPageURL:      types.StringValue(workbook.WebPageURL),
+			LocationID:      types.StringValue(workbook.Location.ID),
+			LocationType:    types.StringValue(workbook.Location.Type),
+			LocationName:    types.StringValue(workbook.Location.Name),
 		}
 		state.Workbooks = append(state.Workbooks, workbooksDataModel)
 	}
