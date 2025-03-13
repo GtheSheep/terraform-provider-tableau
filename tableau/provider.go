@@ -257,11 +257,12 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 		SiteDataSource,
 		DatasourceDataSource,
 		DatasourcesDataSource,
+		DefaultPermissionsDataSource,
 		VirtualConnectionsDataSource,
 		VirtualConnectionConnectionsDataSource,
 		VirtualConnectionRevisionsDataSource,
 		WorkbookConnectionsDataSource,
-    WorkbooksDataSource,
+		WorkbooksDataSource,
 		WorkbookRevisionsDataSource,
 	}
 }
