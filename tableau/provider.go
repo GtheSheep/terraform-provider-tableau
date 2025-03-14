@@ -261,6 +261,7 @@ func (p *tableauProvider) DataSources(_ context.Context) []func() datasource.Dat
 		ProjectPermissionsDataSource,
 		VirtualConnectionsDataSource,
 		VirtualConnectionConnectionsDataSource,
+		VirtualConnectionRevisionDataSource,
 		VirtualConnectionRevisionsDataSource,
 		WorkbookConnectionsDataSource,
 		WorkbooksDataSource,
