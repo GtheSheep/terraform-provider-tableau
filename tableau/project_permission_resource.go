@@ -3,6 +3,7 @@ package tableau
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -111,10 +112,10 @@ func (r *projectPermissionResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	projectID := string(plan.ProjectID.ValueString())
+	projectID := plan.ProjectID.ValueString()
 	capability := Capability{
-		Name: string(plan.CapabilityName.ValueString()),
-		Mode: string(plan.CapabilityMode.ValueString()),
+		Name: plan.CapabilityName.ValueString(),
+		Mode: plan.CapabilityMode.ValueString(),
 	}
 	capabilities := Capabilities{
 		Capabilities: []Capability{capability},
@@ -124,11 +125,11 @@ func (r *projectPermissionResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	entityType := "users"
-	entityID := string(plan.UserID.ValueString())
+	entityID := plan.UserID.ValueString()
 	if plan.UserID.ValueString() != "" {
 		granteeCapability.User = &User{ID: entityID}
 	} else {
-		entityID = string(plan.GroupID.ValueString())
+		entityID = plan.GroupID.ValueString()
 		entityType = "groups"
 		granteeCapability.Group = &Group{ID: entityID}
 	}
@@ -162,7 +163,14 @@ func (r *projectPermissionResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	permission := getProjectPermissionFromID(state.ID.ValueString())
+	permission, err := getProjectPermissionFromID(state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading Tableau Project",
+			err.Error(),
+		)
+		return
+	}
 	projectPermission, err := r.client.GetProjectPermission(permission.ProjectID, permission.EntityID, permission.EntityType, permission.CapabilityName, permission.CapabilityMode)
 	if err != nil {
 		resp.State.RemoveResource(ctx)
@@ -209,7 +217,14 @@ func (r *projectPermissionResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	permission := getProjectPermissionFromID(state.ID.ValueString())
+	permission, err := getProjectPermissionFromID(state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Deleting Tableau Project",
+			err.Error(),
+		)
+		return
+	}
 	if permission.EntityType == "users" {
 		err := r.client.DeleteProjectPermission(&permission.EntityID, nil, permission.ProjectID, permission.CapabilityName, permission.CapabilityMode)
 		if err != nil {
@@ -247,13 +262,21 @@ func getProjectPermissionID(projectID, entityType, entityID, capabilityName, cap
 	return fmt.Sprintf("projects/%s/permissions/%s/%s/%s/%s", projectID, entityType, entityID, capabilityName, capabilityMode)
 }
 
-func getProjectPermissionFromID(projectPermissionID string) ProjectPermission {
+func getProjectPermissionFromID(projectPermissionID string) (*ProjectPermission, error) {
 	parts := strings.Split(projectPermissionID, "/")
-	return ProjectPermission{
+	if len(parts) != 7 {
+		return nil, fmt.Errorf("wrong number of items in ID (%d vs. 7) in %s", len(parts), projectPermissionID)
+	}
+	perms := &ProjectPermission{
 		ProjectID:      parts[1],
 		EntityID:       parts[4],
 		EntityType:     parts[3],
 		CapabilityName: parts[5],
 		CapabilityMode: parts[6],
 	}
+	entityTypes := []string{"groups", "users"}
+	if !slices.Contains(entityTypes, perms.EntityType) {
+		return nil, fmt.Errorf("unknown entity type (%s) not in: %s", perms.EntityType, strings.Join(entityTypes, ", "))
+	}
+	return perms, nil
 }
