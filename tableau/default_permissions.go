@@ -63,7 +63,7 @@ func (c *Client) CreateDefaultPermissions(projectID, targetType string, defaultP
 
 	req, err := http.NewRequest(
 		"PUT",
-		fmt.Sprintf("%s/projects/%s/permissions%s", c.ApiUrl, projectID, targetType),
+		fmt.Sprintf("%s/projects/%s/default-permissions/%s", c.ApiUrl, projectID, targetType),
 		strings.NewReader(string(newProjectPermissionsJson)),
 	)
 	if err != nil {
