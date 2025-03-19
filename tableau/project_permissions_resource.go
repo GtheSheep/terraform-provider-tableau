@@ -46,11 +46,8 @@ func (r *projectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed:    true,
+				Required:    true,
 				Description: "ID of the project",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"grantee_capabilities": schema.ListNestedAttribute{
 				Description: "List of grantee capabilities for users and groups",
