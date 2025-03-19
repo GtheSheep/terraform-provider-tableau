@@ -13,12 +13,15 @@ description: |-
 ## Example Usage
 
 ```terraform
-resource "tableau_default_permissions" "org-admin_group-datasources" {
-  project_id  = resource.tableau_project.org.id
+data "tableau_projects" "example" {}
+data "tableau_groups" "example" {}
+
+resource "tableau_default_permissions" "example" {
+  project_id  = data.tableau_projects.example.projects[0].id
   target_type = "datasources"
   grantee_capabilities = [
     {
-      group_id = var.all_users_group_id
+      group_id = data.tableau_groups.example.groups[0].id
       capabilities = [
         {
           name = "PulseMetricDefine"
@@ -27,7 +30,7 @@ resource "tableau_default_permissions" "org-admin_group-datasources" {
       ]
     },
     {
-      group_id = var.admin_group_id
+      group_id = data.tableau_groups.example.groups[1].id
       capabilities = [
         {
           name = "SaveAs"
@@ -109,5 +112,5 @@ Required:
 Import is supported using the following syntax:
 
 ```shell
-terraform import tableau_default_permission.example "projects/<project uuid>/default-permissions/workbooks"
+terraform import tableau_default_permissions.example "projects/<project uuid>/default-permissions/workbooks"
 ```
