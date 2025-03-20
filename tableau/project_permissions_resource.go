@@ -2,14 +2,10 @@ package tableau
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -122,7 +118,7 @@ func (r *projectPermissionsResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	plan.ID = types.StringValue(getProjectPermissionsID(projectID))
+	plan.ID = types.StringValue(projectID)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -138,23 +134,8 @@ func (r *projectPermissionsResource) Read(ctx context.Context, req resource.Read
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	permission, err := getProjectPermissionsFromID(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error in building default permission ID",
-			err.Error(),
-		)
-		return
-	}
-	if permission == nil {
-		resp.Diagnostics.AddError(
-			"Error in building default permission ID",
-			fmt.Sprintf("getProjectPermissionFromID(%s) returned nil", state.ID.ValueString()),
-		)
-		return
-	}
-	state.ID = types.StringValue(permission.ID)
-	projectPermissions, err := r.client.GetProjectPermissions(permission.ID)
+	projectID := state.ID.ValueString()
+	projectPermissions, err := r.client.GetProjectPermissions(projectID)
 	if err != nil {
 		resp.State.RemoveResource(ctx)
 		return
@@ -162,7 +143,7 @@ func (r *projectPermissionsResource) Read(ctx context.Context, req resource.Read
 	if projectPermissions == nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Tableau Default Permission",
-			fmt.Sprintf("GetProjectPermission returned nil with %#v", permission),
+			"GetProjectPermission returned nil with "+projectID,
 		)
 		return
 	}
@@ -185,7 +166,7 @@ func (r *projectPermissionsResource) Read(ctx context.Context, req resource.Read
 		newGranteeCapability.Capabilities = newCapabilities
 		state.GranteeCapabilities = append(state.GranteeCapabilities, newGranteeCapability)
 	}
-	state.ID = types.StringValue(getProjectPermissionsID(permission.ID))
+	state.ID = types.StringValue(projectID)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -216,15 +197,7 @@ func (r *projectPermissionsResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	permission, err := getProjectPermissionsFromID(state.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Deleting Tableau Default Permissions",
-			err.Error(),
-		)
-		return
-	}
-	if err = r.client.DeleteProjectPermissions(permission.ID); err != nil {
+	if err := r.client.DeleteProjectPermissions(state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting Tableau Default Permissions",
 			"Could not delete default permissions, unexpected error: "+err.Error(),
@@ -243,17 +216,4 @@ func (r *projectPermissionsResource) Configure(_ context.Context, req resource.C
 
 func (r *projectPermissionsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func getProjectPermissionsID(projectID string) string {
-	return fmt.Sprintf("projects/%s/permissions", projectID)
-}
-
-func getProjectPermissionsFromID(id string) (*ProjectPermissions, error) {
-	parts := strings.Split(id, "/")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("wrong number of items in ID (%d vs. 3) in %s", len(parts), id)
-	}
-	perms := &ProjectPermissions{ID: parts[1]}
-	return perms, nil
 }
