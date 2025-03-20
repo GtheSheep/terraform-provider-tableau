@@ -149,7 +149,6 @@ func (r *defaultPermissionsResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-
 	plan.ID = types.StringValue(getDefaultPermissionID(projectID, targetType))
 
 	diags = resp.State.Set(ctx, plan)
@@ -229,6 +228,37 @@ func (r *defaultPermissionsResource) Update(ctx context.Context, req resource.Up
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	projectID := plan.ProjectID.ValueString()
+	targetType := plan.TargetType.ValueString()
+	granteeCapabilities := []GranteeCapability{}
+	for _, granteeCapability := range plan.GranteeCapabilities {
+		newGranteeCapability := GranteeCapability{Capabilities: Capabilities{}}
+		if groupID := granteeCapability.GroupID.ValueString(); groupID != "" {
+			newGranteeCapability.Group = &Group{ID: groupID}
+		}
+		if userID := granteeCapability.UserID.ValueString(); userID != "" {
+			newGranteeCapability.User = &User{ID: userID}
+		}
+		newCapabilities := []Capability{}
+		for _, capability := range granteeCapability.Capabilities {
+			newCapabilities = append(newCapabilities, Capability{
+				Name: capability.Name.ValueString(),
+				Mode: capability.Mode.ValueString(),
+			})
+		}
+		newGranteeCapability.Capabilities.Capabilities = newCapabilities
+		granteeCapabilities = append(granteeCapabilities, newGranteeCapability)
+	}
+	_, err := r.client.CreateDefaultPermissions(projectID, targetType, granteeCapabilities)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating default permission",
+			"Could not create default permission, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	plan.ID = types.StringValue(getDefaultPermissionID(projectID, targetType))
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
