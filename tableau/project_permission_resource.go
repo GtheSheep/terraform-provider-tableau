@@ -133,7 +133,7 @@ func (r *projectPermissionResource) Create(ctx context.Context, req resource.Cre
 		entityType = "groups"
 		granteeCapability.Group = &Group{ID: entityID}
 	}
-	projectPermissions := ProjectPermissions{
+	projectPermissions := GranteeCapabilities{
 		GranteeCapabilities: []GranteeCapability{granteeCapability},
 	}
 

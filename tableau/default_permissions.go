@@ -18,7 +18,7 @@ var defaultPermissionTargetTypes = []string{
 	"workbooks",
 }
 
-func (c *Client) GetDefaultPermissions(projectID, targetType string) (*ProjectPermissions, error) {
+func (c *Client) GetDefaultPermissions(projectID, targetType string) (*GranteeCapabilities, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/projects/%s/default-permissions/%s", c.ApiUrl, projectID, targetType), nil)
 	if err != nil {
 		return nil, err

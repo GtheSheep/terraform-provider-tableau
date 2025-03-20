@@ -22,17 +22,6 @@ type defaultPermissionsDataSource struct {
 	client *Client
 }
 
-type CapabilityModel struct {
-	Name types.String `tfsdk:"name"`
-	Mode types.String `tfsdk:"mode"`
-}
-
-type GranteeCapabilityModel struct {
-	UserID       types.String      `tfsdk:"user_id"`
-	GroupID      types.String      `tfsdk:"group_id"`
-	Capabilities []CapabilityModel `tfsdk:"capabilities"`
-}
-
 type defaultPermissionsDataSourceModel struct {
 	ProjectID           types.String             `tfsdk:"project_id"`
 	TargetType          types.String             `tfsdk:"target_type"`
