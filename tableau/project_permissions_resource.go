@@ -117,7 +117,6 @@ func (r *projectPermissionsResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-
 	plan.ID = types.StringValue(projectID)
 
 	diags = resp.State.Set(ctx, plan)
@@ -181,6 +180,36 @@ func (r *projectPermissionsResource) Update(ctx context.Context, req resource.Up
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	projectID := plan.ID.ValueString()
+	granteeCapabilities := []GranteeCapability{}
+	for _, granteeCapability := range plan.GranteeCapabilities {
+		newGranteeCapability := GranteeCapability{Capabilities: Capabilities{}}
+		if groupID := granteeCapability.GroupID.ValueString(); groupID != "" {
+			newGranteeCapability.Group = &Group{ID: groupID}
+		}
+		if userID := granteeCapability.UserID.ValueString(); userID != "" {
+			newGranteeCapability.User = &User{ID: userID}
+		}
+		newCapabilities := []Capability{}
+		for _, capability := range granteeCapability.Capabilities {
+			newCapabilities = append(newCapabilities, Capability{
+				Name: capability.Name.ValueString(),
+				Mode: capability.Mode.ValueString(),
+			})
+		}
+		newGranteeCapability.Capabilities.Capabilities = newCapabilities
+		granteeCapabilities = append(granteeCapabilities, newGranteeCapability)
+	}
+	_, err := r.client.CreateProjectPermissions(projectID, GranteeCapabilities{GranteeCapabilities: granteeCapabilities})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error update default permission",
+			"Could not update default permission, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	plan.ID = types.StringValue(projectID)
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
