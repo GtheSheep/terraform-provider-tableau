@@ -14,13 +14,9 @@ type VirtualConnectionRevision struct {
 	Owner struct {
 		ID string `json:"id,omitempty"`
 	} `json:"owner,omitempty"`
-	Content string `json:"content"`
-	Name    string `json:"name,omitempty"`
-}
-
-type ListedVirtualConnectionRevision struct {
-	VirtualConnectionID string
-	Publisher           struct {
+	Content   string `json:"content"`
+	Name      string `json:"name,omitempty"`
+	Publisher struct {
 		ID string `json:"id,omitempty"`
 		// Name string `json:"name,omitempty"`
 	} `json:"publisher,omitempty"`
@@ -31,23 +27,23 @@ type ListedVirtualConnectionRevision struct {
 }
 
 type VirtualConnectionRevisionRequest struct {
-	VirtualConnectionRevision ListedVirtualConnectionRevision `json:"virtualConnectionRevisions"`
+	VirtualConnectionRevision VirtualConnectionRevision `json:"virtualConnectionRevisions"`
 }
 
 type VirtualConnectionRevisionResponse struct {
 	VirtualConnectionRevision VirtualConnectionRevision `json:"virtualConnection"`
 }
 
-type ListedVirtualConnectionRevisionsResponse struct {
-	VirtualConnectionRevisions []ListedVirtualConnectionRevision `json:"revision"`
+type VirtualConnectionRevisionsResponse struct {
+	VirtualConnectionRevisions []VirtualConnectionRevision `json:"revision"`
 }
 
 type VirtualConnectionRevisionListResponse struct {
-	VirtualConnectionRevisionsResponse ListedVirtualConnectionRevisionsResponse `json:"revisions"`
-	Pagination                         PaginationDetails                        `json:"pagination"`
+	VirtualConnectionRevisionsResponse VirtualConnectionRevisionsResponse `json:"revisions"`
+	Pagination                         PaginationDetails                  `json:"pagination"`
 }
 
-func (c *Client) GetVirtualConnectionRevisions(virtualConnectionID string) ([]ListedVirtualConnectionRevision, error) {
+func (c *Client) GetVirtualConnectionRevisions(virtualConnectionID string) ([]VirtualConnectionRevision, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/virtualconnections/%s/revisions", c.ApiUrl, virtualConnectionID), nil)
 	if err != nil {
 		return nil, err
@@ -67,7 +63,7 @@ func (c *Client) GetVirtualConnectionRevisions(virtualConnectionID string) ([]Li
 		return nil, err
 	}
 
-	allVirtualConnectionRevisions := make([]ListedVirtualConnectionRevision, 0, totalAvailable)
+	allVirtualConnectionRevisions := make([]VirtualConnectionRevision, 0, totalAvailable)
 	allVirtualConnectionRevisions = append(allVirtualConnectionRevisions, virtualConnectionRevisionsListResponse.VirtualConnectionRevisionsResponse.VirtualConnectionRevisions...)
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
@@ -87,7 +83,7 @@ func (c *Client) GetVirtualConnectionRevisions(virtualConnectionID string) ([]Li
 		allVirtualConnectionRevisions = append(allVirtualConnectionRevisions, virtualConnectionRevisionsListResponse.VirtualConnectionRevisionsResponse.VirtualConnectionRevisions...)
 	}
 	for idx := range allVirtualConnectionRevisions {
-		allVirtualConnectionRevisions[idx].VirtualConnectionID = virtualConnectionID
+		allVirtualConnectionRevisions[idx].ID = virtualConnectionID
 	}
 	return allVirtualConnectionRevisions, nil
 }
