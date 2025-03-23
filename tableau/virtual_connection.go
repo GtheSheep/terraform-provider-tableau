@@ -7,19 +7,14 @@ import (
 )
 
 type VirtualConnection struct {
-	ID      string
+	ID      string `json:"id,omitempty"`
 	Project struct {
 		ID string `json:"id,omitempty"`
 	} `json:"project,omitempty"`
 	Owner struct {
 		ID string `json:"id,omitempty"`
 	} `json:"owner,omitempty"`
-	Content string `json:"content,omitempty"`
-	Name    string `json:"name,omitempty"`
-}
-
-type ListedVirtualConnection struct {
-	ID          string `json:"id,omitempty"`
+	Content     string `json:"content,omitempty"`
 	Name        string `json:"name,omitempty"`
 	CreatedAt   string `json:"createdAt,omitempty"`
 	UpdatedAt   string `json:"updatedAt,omitempty"`
@@ -29,7 +24,7 @@ type ListedVirtualConnection struct {
 }
 
 type VirtualConnectionsRequest struct {
-	VirtualConnection ListedVirtualConnection `json:"virtualConnection"`
+	VirtualConnection VirtualConnection `json:"virtualConnection"`
 }
 
 type VirtualConnectionResponse struct {
@@ -37,7 +32,7 @@ type VirtualConnectionResponse struct {
 }
 
 type VirtualConnectionsResponse struct {
-	VirtualConnections []ListedVirtualConnection `json:"virtualConnection"`
+	VirtualConnections []VirtualConnection `json:"virtualConnection"`
 }
 
 type VirtualConnectionsListResponse struct {
@@ -64,7 +59,7 @@ func (c *Client) GetVirtualConnection(ID string) (*VirtualConnection, error) {
 	return &virtualConnectionResponse.VirtualConnection, nil
 }
 
-func (c *Client) GetVirtualConnections() ([]ListedVirtualConnection, error) {
+func (c *Client) GetVirtualConnections() ([]VirtualConnection, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/virtualconnections", c.ApiUrl), nil)
 	if err != nil {
 		return nil, err
@@ -86,7 +81,7 @@ func (c *Client) GetVirtualConnections() ([]ListedVirtualConnection, error) {
 		return nil, err
 	}
 
-	allVirtualConnections := make([]ListedVirtualConnection, 0, totalAvailable)
+	allVirtualConnections := make([]VirtualConnection, 0, totalAvailable)
 	allVirtualConnections = append(allVirtualConnections, virtualConnectionListResponse.VirtualConnectionsResponse.VirtualConnections...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
