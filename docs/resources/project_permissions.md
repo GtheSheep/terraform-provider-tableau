@@ -55,9 +55,6 @@ resource "tableau_project_permissions" "example" {
 ### Required
 
 - `grantee_capabilities` (Attributes List) List of grantee capabilities for users and groups (see [below for nested schema](#nestedatt--grantee_capabilities))
-
-### Read-Only
-
 - `id` (String) ID of the project
 
 <a id="nestedatt--grantee_capabilities"></a>
