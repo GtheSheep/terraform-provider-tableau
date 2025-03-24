@@ -48,15 +48,15 @@ func (c *Client) GetDefaultPermissions(projectID, targetType string) (*DefaultPe
 	return defaultPermissions, nil
 }
 
-func (c *Client) CreateDefaultPermissions(projectID, targetType string, defaultPermissions []GranteeCapability) (*ProjectPermissions, error) {
+func (c *Client) CreateDefaultPermissions(projectID, targetType string, defaultPermissions []GranteeCapability) (*GranteeCapabilities, error) {
 
-	projectPermissionsRequest := ProjectPermissionsRequest{
-		ProjectPermissions: ProjectPermissions{
+	defaultPermissionsRequest := ProjectPermissionsRequest{
+		ProjectPermissions: GranteeCapabilities{
 			GranteeCapabilities: defaultPermissions,
 		},
 	}
 
-	newProjectPermissionsJson, err := json.Marshal(projectPermissionsRequest)
+	newDefaultPermissionsJson, err := json.Marshal(defaultPermissionsRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *Client) CreateDefaultPermissions(projectID, targetType string, defaultP
 	req, err := http.NewRequest(
 		"PUT",
 		fmt.Sprintf("%s/projects/%s/default-permissions/%s", c.ApiUrl, projectID, targetType),
-		strings.NewReader(string(newProjectPermissionsJson)),
+		strings.NewReader(string(newDefaultPermissionsJson)),
 	)
 	if err != nil {
 		return nil, err
@@ -84,17 +84,23 @@ func (c *Client) CreateDefaultPermissions(projectID, targetType string, defaultP
 	return &projectPermissionsResponse.ProjectPermissions, nil
 }
 
-func (c *Client) DeleteDefaultPermissions(projectID, targetType string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/projects/%s/default-permissions/%s", c.ApiUrl, projectID, targetType), nil)
+func (c *Client) DeleteDefaultPermission(userID, groupID *string, projectID, targetType, capabilityName, capabilityMode string) error {
+	var entityID string
+	entityType := "users"
+	if userID != nil && *userID != "" {
+		entityID = *userID
+	} else if groupID != nil && *groupID != "" {
+		entityType = "groups"
+		entityID = *groupID
+	}
 
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/projects/%s/default-permissions/%s/%s/%s/%s/%s", c.ApiUrl, projectID, targetType, entityType, entityID, capabilityName, capabilityMode), nil)
 	if err != nil {
 		return err
 	}
-
 	_, err = c.doRequest(req)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
