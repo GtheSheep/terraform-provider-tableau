@@ -28,18 +28,3 @@ func (c *Client) GetProjectPermissions(projectID string) (*GranteeCapabilities, 
 	}
 	return &projectPermissionsResponse.ProjectPermissions, nil
 }
-
-func (c *Client) DeleteProjectPermissions(projectID string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/projects/%s/permissions", c.ApiUrl, projectID), nil)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = c.doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

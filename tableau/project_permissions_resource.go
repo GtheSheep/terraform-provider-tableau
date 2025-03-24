@@ -2,10 +2,15 @@ package tableau
 
 import (
 	"context"
+	"maps"
+	"slices"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -66,10 +71,23 @@ func (r *projectPermissionsResource) Schema(_ context.Context, _ resource.Schema
 									"name": schema.StringAttribute{
 										Required:    true,
 										Description: "Name of the capability",
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{
+												"ProjectLeader",
+												"Read",
+												"Write",
+											}...),
+										},
 									},
 									"mode": schema.StringAttribute{
 										Required:    true,
 										Description: "Mode of the capability (Allow/Deny)",
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{
+												"Allow",
+												"Deny",
+											}...),
+										},
 									},
 								},
 							},
@@ -117,6 +135,7 @@ func (r *projectPermissionsResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
+
 	plan.ID = types.StringValue(projectID)
 
 	diags = resp.State.Set(ctx, plan)
@@ -126,6 +145,113 @@ func (r *projectPermissionsResource) Create(ctx context.Context, req resource.Cr
 	}
 }
 
+// granteeCapabilitiesModelMap turns `[]GranteeCapabilityModel` into map structure where
+// 1st key is key combined from user and/or group UUID
+// 2nd key is capability name
+// and final value is mode of that capability
+func granteeCapabilitiesModelMap(granteeCapabilityModels []GranteeCapabilityModel) map[string]map[string]string {
+	mapping := map[string]map[string]string{}
+	for _, granteeCapability := range granteeCapabilityModels {
+		key := ""
+		if granteeCapability.GroupID.ValueString() != "" {
+			key = "|" + granteeCapability.GroupID.ValueString()
+		} else if granteeCapability.UserID.ValueString() != "" {
+			key = granteeCapability.UserID.ValueString() + "|"
+		}
+		mapping[key] = map[string]string{}
+		for _, capability := range granteeCapability.Capabilities {
+			mapping[key][capability.Name.ValueString()] = capability.Mode.ValueString()
+		}
+	}
+	return mapping
+}
+
+// granteeCapabilitiesMap turns `[]GranteeCapability` into map structure where
+// 1st key is key combined from user and/or group UUID
+// 2nd key is capability name
+// and final value is mode of that capability
+func granteeCapabilitiesMap(granteeCapabilities []GranteeCapability) map[string]map[string]string {
+	mapping := map[string]map[string]string{}
+	for _, granteeCapability := range granteeCapabilities {
+		key := ""
+		if granteeCapability.Group != nil {
+			key = "|" + granteeCapability.Group.ID
+		} else if granteeCapability.User != nil {
+			key = granteeCapability.User.ID + "|"
+		}
+		mapping[key] = map[string]string{}
+		for _, capability := range granteeCapability.Capabilities.Capabilities {
+			mapping[key][capability.Name] = capability.Mode
+		}
+	}
+	return mapping
+}
+
+// mergeGrantees updates current state with the information that has been fetched from Tableau.
+// This covers:
+// - updating mode in current grantees capabilities
+// - adding new grantees and/or grantee's capabilities
+// - removing old grantees and/or grantee's capabilities
+func mergeGrantees(state []GranteeCapabilityModel, readValues map[string]map[string]string) []GranteeCapabilityModel {
+	grantees := len(state)
+	gidx := 0
+	for gidx < grantees {
+		key := state[gidx].UserID.ValueString() + "|" + state[gidx].GroupID.ValueString()
+		if _, ok := readValues[key]; !ok { // grantee has disappeared
+			state = slices.Delete(state, gidx, gidx+1)
+			grantees--
+			continue
+		}
+		capabilities := len(state[gidx].Capabilities)
+		cidx := 0
+		for cidx < capabilities {
+			name := state[gidx].Capabilities[cidx].Name.ValueString()
+			if _, ok := readValues[key][name]; !ok { // capability in grantee has disappeared
+				state[gidx].Capabilities = slices.Delete(state[gidx].Capabilities, cidx, cidx+1)
+				capabilities--
+				continue
+			}
+			mode := state[gidx].Capabilities[cidx].Mode.ValueString()
+			if readValues[key][name] != mode {
+				state[gidx].Capabilities[cidx].Mode = types.StringValue(readValues[key][name])
+			}
+			delete(readValues[key], name)
+			cidx++
+		}
+		for name, mode := range readValues[key] { // capabilities that are missing from state
+			state[gidx].Capabilities = append(state[gidx].Capabilities, CapabilityModel{
+				Name: types.StringValue(name),
+				Mode: types.StringValue(mode),
+			})
+		}
+		delete(readValues, key)
+		gidx++
+	}
+	for grantee, capabilities := range readValues { // grantees that are missing from state
+		fields := strings.Split(grantee, "|")
+		newGrantee := GranteeCapabilityModel{
+			UserID:       types.StringValue(fields[0]),
+			GroupID:      types.StringValue(fields[1]),
+			Capabilities: []CapabilityModel{},
+		}
+		for name, mode := range capabilities { // capabilities for new grantee
+			newGrantee.Capabilities = append(newGrantee.Capabilities, CapabilityModel{
+				Name: types.StringValue(name),
+				Mode: types.StringValue(mode),
+			})
+		}
+		state = append(state, newGrantee)
+	}
+	return state
+}
+
+// Read is perhaps unnecessarily complex looking creature, but initial attempts to build something that would
+// `[]GranteeCapabilityModel` and then simply assign it into `state.GranteeCapabilities` kept on making new
+// `terraform plan`s which always had capabilities in wrong order or something and terraform would therefore
+// say that those resources needed updating.
+// Current solution reads relevant information from tableau, go through the data in same order as it is in state,
+// modified if needed and adds all the new stuff at the end of capabilities/granteeCapabilities and deletes
+// if it feels that something that is in state does not exist in Tableau
 func (r *projectPermissionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state projectPermissionsResourceModel
 	diags := req.State.Get(ctx, &state)
@@ -141,30 +267,13 @@ func (r *projectPermissionsResource) Read(ctx context.Context, req resource.Read
 	}
 	if projectPermissions == nil {
 		resp.Diagnostics.AddError(
-			"Error Reading Tableau Default Permission",
+			"Error Reading Tableau Project Permission",
 			"GetProjectPermission returned nil with "+projectID,
 		)
 		return
 	}
-	state.GranteeCapabilities = []GranteeCapabilityModel{}
-	for _, granteeCapabilities := range projectPermissions.GranteeCapabilities {
-		newGranteeCapability := GranteeCapabilityModel{}
-		if granteeCapabilities.Group != nil {
-			newGranteeCapability.GroupID = types.StringValue(granteeCapabilities.Group.ID)
-		}
-		if granteeCapabilities.User != nil {
-			newGranteeCapability.UserID = types.StringValue(granteeCapabilities.User.ID)
-		}
-		newCapabilities := []CapabilityModel{}
-		for _, capabilities := range granteeCapabilities.Capabilities.Capabilities {
-			newCapabilities = append(newCapabilities, CapabilityModel{
-				Name: types.StringValue(capabilities.Name),
-				Mode: types.StringValue(capabilities.Mode),
-			})
-		}
-		newGranteeCapability.Capabilities = newCapabilities
-		state.GranteeCapabilities = append(state.GranteeCapabilities, newGranteeCapability)
-	}
+	newGranteeModel := granteeCapabilitiesMap(projectPermissions.GranteeCapabilities)
+	state.GranteeCapabilities = mergeGrantees(state.GranteeCapabilities, newGranteeModel)
 	state.ID = types.StringValue(projectID)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -173,14 +282,18 @@ func (r *projectPermissionsResource) Read(ctx context.Context, req resource.Read
 	}
 }
 
+// Update operation is combination of PUT and one or more DELETE operations.
+// If we modify permissions from Allow to Deny or reverse, add grantees and capabilities, we can handle it all with single
+// PUT REST API call, but if we drop some capabilities from grantee or drop whole grantee, then we have to call DELETE
+// method for each and every capability to clean them out.
 func (r *projectPermissionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan projectPermissionsResourceModel
+
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	projectID := plan.ID.ValueString()
 	granteeCapabilities := []GranteeCapability{}
 	for _, granteeCapability := range plan.GranteeCapabilities {
@@ -204,10 +317,64 @@ func (r *projectPermissionsResource) Update(ctx context.Context, req resource.Up
 	_, err := r.client.CreateProjectPermissions(projectID, GranteeCapabilities{GranteeCapabilities: granteeCapabilities})
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error update default permission",
-			"Could not update default permission, unexpected error: "+err.Error(),
+			"Error creating default permission",
+			"Could not create default permission, unexpected error: "+err.Error(),
 		)
 		return
+	}
+	current, err := r.client.GetProjectPermissions(projectID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating project permission",
+			"Could not fetch project permission, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	// Section that involves DELETE calls
+	currentGranteeModel := granteeCapabilitiesMap(current.GranteeCapabilities)
+	planGranteeModel := granteeCapabilitiesModelMap(plan.GranteeCapabilities)
+	planGranteeKeys := slices.Collect(maps.Keys(planGranteeModel))
+	for currentGrantee, currentCapability := range currentGranteeModel {
+		if slices.Contains(planGranteeKeys, currentGrantee) {
+			planCapabilities := slices.Collect(maps.Keys(planGranteeModel[currentGrantee]))
+			for currentCapabilityName, currentCapabilityValue := range currentCapability {
+				if !slices.Contains(planCapabilities, currentCapabilityName) { // missing capability
+					fields := strings.Split(currentGrantee, "|")
+					err := r.client.DeleteProjectPermission(
+						&fields[0],
+						&fields[1],
+						projectID,
+						currentCapabilityName,
+						currentCapabilityValue,
+					)
+					if err != nil {
+						resp.Diagnostics.AddError(
+							"Error Deleting Tableau Project Permissions",
+							"Could not delete project permissions, unexpected error: "+err.Error(),
+						)
+						return
+					}
+				}
+			}
+		} else { // missing grantee requires that we delete all capabilities one by one
+			for currentCapabilityName, currentCapabilityValue := range currentCapability {
+				fields := strings.Split(currentGrantee, "|")
+				err := r.client.DeleteProjectPermission(
+					&fields[0],
+					&fields[1],
+					projectID,
+					currentCapabilityName,
+					currentCapabilityValue,
+				)
+				if err != nil {
+					resp.Diagnostics.AddError(
+						"Error Deleting Tableau Project Permissions",
+						"Could not delete project permissions, unexpected error: "+err.Error(),
+					)
+					return
+				}
+			}
+		}
 	}
 	plan.ID = types.StringValue(projectID)
 
@@ -218,6 +385,7 @@ func (r *projectPermissionsResource) Update(ctx context.Context, req resource.Up
 	}
 }
 
+// Delete all grantees and their capabilities from project
 func (r *projectPermissionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state projectPermissionsResourceModel
 	diags := req.State.Get(ctx, &state)
@@ -226,12 +394,24 @@ func (r *projectPermissionsResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	if err := r.client.DeleteProjectPermissions(state.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError(
-			"Error Deleting Tableau Default Permissions",
-			"Could not delete default permissions, unexpected error: "+err.Error(),
-		)
-		return
+	projectID := state.ID.ValueString()
+	for _, grantee := range state.GranteeCapabilities {
+		for _, capability := range grantee.Capabilities {
+			err := r.client.DeleteProjectPermission(
+				grantee.UserID.ValueStringPointer(),
+				grantee.GroupID.ValueStringPointer(),
+				projectID,
+				capability.Name.ValueString(),
+				capability.Mode.ValueString(),
+			)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Error Deleting Tableau project Permissions",
+					"Could not delete project permissions, unexpected error: "+err.Error(),
+				)
+				return
+			}
+		}
 	}
 }
 
