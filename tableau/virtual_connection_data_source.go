@@ -2,7 +2,6 @@ package tableau
 
 import (
 	"context"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -52,7 +51,7 @@ func (d *virtualConnectionDataSource) Schema(_ context.Context, _ datasource.Sch
 			},
 			"content": schema.StringAttribute{
 				Computed:    true,
-				Description: "Definition of the virtual connection as escaped JSON",
+				Description: "Definition of the virtual connection as JSON",
 			},
 			"name": schema.StringAttribute{
 				Computed:    true,
@@ -77,7 +76,7 @@ func (d *virtualConnectionDataSource) Read(ctx context.Context, req datasource.R
 	}
 	state.ProjectID = types.StringValue(virtualConnection.Project.ID)
 	state.OwnerID = types.StringValue(virtualConnection.Owner.ID)
-	state.Content = types.StringValue(strings.ReplaceAll(virtualConnection.Content, "\\\"", "\""))
+	state.Content = types.StringValue(virtualConnection.Content)
 	state.Name = types.StringValue(virtualConnection.Name)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
