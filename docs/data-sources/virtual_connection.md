@@ -29,7 +29,7 @@ data "tableau_virtual_connection" "vc0" {
 
 ### Read-Only
 
-- `content` (String) Definition of the virtual connection as escaped JSON
+- `content` (String) Definition of the virtual connection as JSON
 - `name` (String) Name of the virtual connection
 - `owner_id` (String) Owner ID of the virtual connection
 - `project_id` (String) Project ID of the virtual connection
