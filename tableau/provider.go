@@ -280,6 +280,7 @@ func (p *tableauProvider) Resources(_ context.Context) []func() resource.Resourc
 		NewProjectPermissionResource,
 		NewViewPermissionResource,
 		NewVirtualConnectionPermissionResource,
+		NewWorkbookResource,
 		NewWorkbookPermissionResource,
 	}
 }
