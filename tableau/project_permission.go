@@ -30,16 +30,16 @@ type ProjectPermission struct {
 	CapabilityMode string
 }
 
-type ProjectPermissions struct {
+type GranteeCapabilities struct {
 	GranteeCapabilities []GranteeCapability `json:"granteeCapabilities"`
 }
 
 type ProjectPermissionsRequest struct {
-	ProjectPermissions ProjectPermissions `json:"permissions"`
+	ProjectPermissions GranteeCapabilities `json:"permissions"`
 }
 
 type ProjectPermissionsResponse struct {
-	ProjectPermissions ProjectPermissions `json:"permissions"`
+	ProjectPermissions GranteeCapabilities `json:"permissions"`
 }
 
 func (c *Client) GetProjectPermission(projectID, entityID, entityType, capabilityName, capabilityMode string) (*ProjectPermission, error) {
@@ -91,7 +91,7 @@ func (c *Client) GetProjectPermission(projectID, entityID, entityType, capabilit
 	return nil, nil
 }
 
-func (c *Client) CreateProjectPermissions(projectID string, projectPermissions ProjectPermissions) (*ProjectPermissions, error) {
+func (c *Client) CreateProjectPermissions(projectID string, projectPermissions GranteeCapabilities) (*GranteeCapabilities, error) {
 
 	projectPermissionsRequest := ProjectPermissionsRequest{
 		ProjectPermissions: projectPermissions,
