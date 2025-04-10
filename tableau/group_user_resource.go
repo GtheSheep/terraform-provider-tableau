@@ -110,6 +110,7 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 	groupUser, err := r.client.GetGroupUser(groupID, userID)
 	if err != nil {
 		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	combinedID := GetCombinedID(groupID, userID)
