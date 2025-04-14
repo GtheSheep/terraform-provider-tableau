@@ -122,6 +122,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	group, err := r.client.GetGroup(state.ID.ValueString())
 	if err != nil {
 		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	state.ID = types.StringValue(group.ID)
