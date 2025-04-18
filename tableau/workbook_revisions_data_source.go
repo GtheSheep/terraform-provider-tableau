@@ -104,9 +104,6 @@ func (d *workbookRevisionsDataSource) Read(ctx context.Context, req datasource.R
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (d *workbookRevisionsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {

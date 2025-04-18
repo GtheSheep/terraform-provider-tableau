@@ -103,9 +103,6 @@ func (d *virtualConnectionConnectionsDataSource) Read(ctx context.Context, req d
 	}
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (d *virtualConnectionConnectionsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {

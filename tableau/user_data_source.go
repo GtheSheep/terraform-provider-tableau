@@ -89,9 +89,6 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
