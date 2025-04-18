@@ -13,7 +13,7 @@ Retrieve datasource details as a list of datasources available to read
 ## Example Usage
 
 ```terraform
-data "tableau_groups" "example" {
+data "tableau_datasources" "example" {
 }
 ```
 

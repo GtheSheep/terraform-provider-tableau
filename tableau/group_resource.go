@@ -53,7 +53,7 @@ func (r *groupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "Display name for group",
 			},
 			"minimum_site_role": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "Minimum site role for the group",
 				Validators: []validator.String{
 					stringvalidator.OneOf([]string{
@@ -86,8 +86,10 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+		Name: plan.Name.ValueString(),
+	}
+	if plan.MinimumSiteRole.ValueString() != "" {
+		group.MinimumSiteRole = plan.MinimumSiteRole.ValueString()
 	}
 
 	createdGroup, err := r.client.CreateGroup(group.Name, group.MinimumSiteRole)
@@ -120,6 +122,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	group, err := r.client.GetGroup(state.ID.ValueString())
 	if err != nil {
 		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	state.ID = types.StringValue(group.ID)
@@ -147,8 +150,8 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	group := Group{
-		Name:            string(plan.Name.ValueString()),
-		MinimumSiteRole: string(plan.MinimumSiteRole.ValueString()),
+		Name:            plan.Name.ValueString(),
+		MinimumSiteRole: plan.MinimumSiteRole.ValueString(),
 	}
 
 	_, err := r.client.UpdateGroup(plan.ID.ValueString(), group.Name, group.MinimumSiteRole)

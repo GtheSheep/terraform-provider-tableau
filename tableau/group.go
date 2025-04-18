@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -17,7 +16,7 @@ type GroupImport struct {
 type Group struct {
 	ID              string       `json:"id,omitempty"`
 	Name            string       `json:"name"`
-	MinimumSiteRole string       `json:"minimumSiteRole"`
+	MinimumSiteRole string       `json:"minimumSiteRole,omitempty"`
 	Import          *GroupImport `json:"import,omitempty"`
 }
 
@@ -62,13 +61,11 @@ func (c *Client) GetGroups() ([]Group, error) {
 	}
 
 	allGroups := make([]Group, 0, totalAvailable)
-	for _, group := range groupListResponse.GroupsResponse.Groups {
-		allGroups = append(allGroups, group)
-	}
+	allGroups = append(allGroups, groupListResponse.GroupsResponse.Groups...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -81,9 +78,7 @@ func (c *Client) GetGroups() ([]Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, group := range groupListResponse.GroupsResponse.Groups {
-			allGroups = append(allGroups, group)
-		}
+		allGroups = append(allGroups, groupListResponse.GroupsResponse.Groups...)
 	}
 
 	return allGroups, nil
@@ -119,7 +114,7 @@ func (c *Client) GetGroup(groupID string) (*Group, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/groups?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}

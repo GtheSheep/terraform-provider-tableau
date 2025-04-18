@@ -15,6 +15,20 @@ func TestAccGroupResource(t *testing.T) {
 				Config: providerConfig + `
 resource "tableau_group" "test" {
   name = "test"
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("tableau_group.test", "id"),
+					resource.TestCheckResourceAttrSet("tableau_group.test", "last_updated"),
+					resource.TestCheckResourceAttrSet("tableau_group.test", "name"),
+					resource.TestCheckResourceAttr("tableau_group.test", "name", "test"),
+				),
+			},
+			// Add minimum_site_role
+			{
+				Config: providerConfig + `
+resource "tableau_group" "test" {
+  name = "test"
   minimum_site_role = "Viewer"
 }
 `,

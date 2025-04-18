@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type Tag struct {
@@ -74,13 +73,11 @@ func (c *Client) GetDatasources() ([]Datasource, error) {
 	}
 
 	allDatasources := make([]Datasource, 0, totalAvailable)
-	for _, datasource := range datasourceListResponse.DatasourcesResponse.Datasources {
-		allDatasources = append(allDatasources, datasource)
-	}
+	allDatasources = append(allDatasources, datasourceListResponse.DatasourcesResponse.Datasources...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -93,9 +90,7 @@ func (c *Client) GetDatasources() ([]Datasource, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, datasource := range datasourceListResponse.DatasourcesResponse.Datasources {
-			allDatasources = append(allDatasources, datasource)
-		}
+		allDatasources = append(allDatasources, datasourceListResponse.DatasourcesResponse.Datasources...)
 	}
 
 	return allDatasources, nil
@@ -131,7 +126,7 @@ func (c *Client) GetDatasource(datasourceID, name string) (*Datasource, error) {
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/datasources?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}

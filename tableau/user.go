@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -58,13 +57,11 @@ func (c *Client) GetUsers() ([]User, error) {
 	}
 
 	allUsers := make([]User, 0, totalAvailable)
-	for _, user := range userListResponse.UsersResponse.Users {
-		allUsers = append(allUsers, user)
-	}
+	allUsers = append(allUsers, userListResponse.UsersResponse.Users...)
 
 	for page := pageNumber + 1; page <= totalPageCount; page++ {
 		fmt.Printf("Searching page %d", page)
-		req, err = http.NewRequest("GET", fmt.Sprintf("%s/users?pageNumber=%s", c.ApiUrl, strconv.Itoa(page)), nil)
+		req, err = http.NewRequest("GET", fmt.Sprintf("%s/users?pageNumber=%d", c.ApiUrl, page), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -77,9 +74,7 @@ func (c *Client) GetUsers() ([]User, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, user := range userListResponse.UsersResponse.Users {
-			allUsers = append(allUsers, user)
-		}
+		allUsers = append(allUsers, userListResponse.UsersResponse.Users...)
 	}
 
 	return allUsers, nil
@@ -142,10 +137,12 @@ func (c *Client) CreateUser(email, name, fullName, siteRole, authSetting string)
 	return &userResponse.User, nil
 }
 
-func (c *Client) UpdateUser(userID, name, siteRole, authSetting string) (*User, error) {
+func (c *Client) UpdateUser(userID, email, name, fullName, siteRole, authSetting string) (*User, error) {
 
 	newUser := User{
+		Email:       email,
 		Name:        name,
+		FullName:    fullName,
 		SiteRole:    siteRole,
 		AuthSetting: authSetting,
 	}
