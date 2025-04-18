@@ -88,9 +88,6 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"last_updated": schema.StringAttribute{
 				Computed:    true,
 				Description: "Timestamp of the last Terraform update of the project",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
