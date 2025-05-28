@@ -19,7 +19,7 @@ terraform {
 Both username/ password and personal access token methods are supported by 
 this provider, the official docs around PATs can be found, [here](https://help.tableau.com/current/online/en-us/security_personal_access_tokens.htm)
 
-## Testing
+## Unit Testing
 
 Some resources are only useful for Tableau Server management, whereas the core of this provider aims to serve Tableau Cloud, because of this
 some methods will not be available in the API, to turn on acceptance testing for the provider, to test Server based resources, set the
