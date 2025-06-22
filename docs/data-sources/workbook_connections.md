@@ -3,12 +3,12 @@
 page_title: "tableau_workbook_connections Data Source - terraform-provider-tableau"
 subcategory: ""
 description: |-
-  Retrieve virtual connection connections details
+  Retrieve workbook connections details
 ---
 
 # tableau_workbook_connections (Data Source)
 
-Retrieve virtual connection connections details
+Retrieve workbook connections details
 
 ## Example Usage
 
@@ -23,11 +23,11 @@ data "tableau_workbook_connections" "example" {
 
 ### Required
 
-- `id` (String) ID of the virtual connections
+- `id` (String) ID of the workbook
 
 ### Read-Only
 
-- `connections` (Attributes List) List database connections of virtual connection and their attributes (see [below for nested schema](#nestedatt--connections))
+- `connections` (Attributes List) List workbook connections and their attributes (see [below for nested schema](#nestedatt--connections))
 
 <a id="nestedatt--connections"></a>
 ### Nested Schema for `connections`
@@ -37,7 +37,7 @@ Read-Only:
 - `authentication_type` (String) Authentication type
 - `datasource_id` (String) ID of datasource
 - `embed_password` (Boolean) Embed database password into connection
-- `id` (String) ID of the connection in Virtual Connection
+- `id` (String) ID of the workbook connection
 - `query_tagging_enabled` (Boolean) Query tagging enabled
 - `server_address` (String) Server address
 - `server_port` (String) Server port
