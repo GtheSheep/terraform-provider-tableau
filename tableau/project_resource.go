@@ -88,9 +88,6 @@ func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"last_updated": schema.StringAttribute{
 				Computed:    true,
 				Description: "Timestamp of the last Terraform update of the project",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
@@ -177,20 +174,11 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		ParentProjectID:    plan.ParentProjectID.ValueString(),
 		Owner:              Owner{ID: plan.OwnerID.ValueString()},
 	}
-	_, err := r.client.UpdateProject(plan.ID.ValueString(), project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
+	updatedProject, err := r.client.UpdateProject(plan.ID.ValueString(), project.Name, project.ParentProjectID, project.Description, project.ContentPermissions, project.Owner.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Tableau Project",
 			"Could not update project, unexpected error: "+err.Error(),
-		)
-		return
-	}
-
-	updatedProject, err := r.client.GetProject(plan.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error Reading Tableau Project",
-			"Could not read Tableau project ID "+plan.ID.ValueString()+": "+err.Error(),
 		)
 		return
 	}
