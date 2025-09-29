@@ -43,6 +43,10 @@ type SignInResponse struct {
 	SignInResponseData SignInResponseData `json:"credentials"`
 }
 
+type requestOptions struct {
+	contentType string
+}
+
 func NewClient(server, username, password, personalAccessTokenName, personalAccessTokenSecret, site, serverVersion *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
@@ -93,9 +97,15 @@ func NewClient(server, username, password, personalAccessTokenName, personalAcce
 	return &c, nil
 }
 
-func (c *Client) doRequest(req *http.Request) ([]byte, error) {
+func (c *Client) doRequest(req *http.Request, optFns ...func(*requestOptions)) ([]byte, error) {
+	reqOpts := &requestOptions{
+		contentType: "application/json",
+	}
+	for _, optFn := range optFns {
+		optFn(reqOpts)
+	}
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Type", reqOpts.contentType)
 	req.Header.Add("X-Tableau-Auth", c.AuthToken)
 
 	res, err := c.HTTPClient.Do(req)
