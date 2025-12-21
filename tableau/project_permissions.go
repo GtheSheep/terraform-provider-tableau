@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetProjectPermissions(projectID string) (*ProjectPermissions, error) {
+func (c *Client) GetProjectPermissions(projectID string) (*GranteeCapabilities, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/projects/%s/permissions", c.ApiUrl, projectID), nil)
 	if err != nil {
 		return nil, err
