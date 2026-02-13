@@ -7,8 +7,16 @@ import (
 )
 
 type VirtualConnectionRevision struct {
-	VirtualConnectionID string
-	Publisher           struct {
+	ID      string `json:"id,omitempty"`
+	Project struct {
+		ID string `json:"id,omitempty"`
+	} `json:"project,omitempty"`
+	Owner struct {
+		ID string `json:"id,omitempty"`
+	} `json:"owner,omitempty"`
+	Content   string `json:"content"`
+	Name      string `json:"name,omitempty"`
+	Publisher struct {
 		ID string `json:"id,omitempty"`
 		// Name string `json:"name,omitempty"`
 	} `json:"publisher,omitempty"`
@@ -20,6 +28,10 @@ type VirtualConnectionRevision struct {
 
 type VirtualConnectionRevisionRequest struct {
 	VirtualConnectionRevision VirtualConnectionRevision `json:"virtualConnectionRevisions"`
+}
+
+type VirtualConnectionRevisionResponse struct {
+	VirtualConnectionRevision VirtualConnectionRevision `json:"virtualConnection"`
 }
 
 type VirtualConnectionRevisionsResponse struct {
@@ -71,7 +83,27 @@ func (c *Client) GetVirtualConnectionRevisions(virtualConnectionID string) ([]Vi
 		allVirtualConnectionRevisions = append(allVirtualConnectionRevisions, virtualConnectionRevisionsListResponse.VirtualConnectionRevisionsResponse.VirtualConnectionRevisions...)
 	}
 	for idx := range allVirtualConnectionRevisions {
-		allVirtualConnectionRevisions[idx].VirtualConnectionID = virtualConnectionID
+		allVirtualConnectionRevisions[idx].ID = virtualConnectionID
 	}
 	return allVirtualConnectionRevisions, nil
+}
+
+func (c *Client) GetVirtualConnectionRevision(virtualConnectionID string, revisionNumber int32) (*VirtualConnectionRevision, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/virtualconnections/%s/revisions/%d", c.ApiUrl, virtualConnectionID, revisionNumber), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	virtualConnectionRevisionResponse := VirtualConnectionRevisionResponse{}
+	err = json.Unmarshal(body, &virtualConnectionRevisionResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	virtualConnectionRevisionResponse.VirtualConnectionRevision.ID = virtualConnectionID
+	return &virtualConnectionRevisionResponse.VirtualConnectionRevision, nil
 }

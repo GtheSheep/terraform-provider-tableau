@@ -3,12 +3,12 @@
 page_title: "tableau_workbook_revisions Data Source - terraform-provider-tableau"
 subcategory: ""
 description: |-
-  Retrieve virtual connection revisions details
+  Retrieve workbook revisions details
 ---
 
 # tableau_workbook_revisions (Data Source)
 
-Retrieve virtual connection revisions details
+Retrieve workbook revisions details
 
 ## Example Usage
 
@@ -23,11 +23,11 @@ data "tableau_workbook_revisions" "example" {
 
 ### Required
 
-- `id` (String) ID of the virtual connections
+- `id` (String) ID of the workbook
 
 ### Read-Only
 
-- `revisions` (Attributes List) List database connections of virtual connection and their attributes (see [below for nested schema](#nestedatt--revisions))
+- `revisions` (Attributes List) List workbook revisions and their attributes (see [below for nested schema](#nestedatt--revisions))
 
 <a id="nestedatt--revisions"></a>
 ### Nested Schema for `revisions`
