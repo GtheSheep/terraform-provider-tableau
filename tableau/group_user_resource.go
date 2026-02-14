@@ -88,9 +88,6 @@ func (r *groupUserResource) Create(ctx context.Context, req resource.CreateReque
 
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -120,9 +117,6 @@ func (r *groupUserResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 }
 
 func (r *groupUserResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
